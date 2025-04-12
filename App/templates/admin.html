@@ -16,7 +16,7 @@
     </style>
     <script>
         let map, selectedMarker = null, selectedLocation = null;
-
+    
         function initMap() {
             const uwiLocation = { lat: 10.6417, lng: -61.3995 };
             map = new google.maps.Map(document.getElementById("map"), {
@@ -30,12 +30,35 @@
                     strictBounds: true
                 }
             });
+    
+            map.addListener("click", (e) => {
+                const lat = e.latLng.lat();
+                const lng = e.latLng.lng();
 
+                document.getElementById("latitudeInput").value = lat;
+                document.getElementById("longitudeInput").value = lng;
+    
+                if (selectedMarker) {
+                    selectedMarker.setMap(null);
+                }
+    
+                selectedMarker = new google.maps.Marker({
+                    position: { lat, lng },
+                    map: map,
+                    title: "New Location"
+                });
+    
+                selectedLocation = { latitude: lat, longitude: lng };
+                document.getElementById("locationNameInput").value = "";
+                document.getElementById("buildingTypeInput").value = "";
+                document.getElementById("coordsDisplay").innerText = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+            });
+    
             google.maps.event.addListenerOnce(map, 'idle', function() {
                 loadSavedLocations();
             });
         }
-
+    
         function loadSavedLocations() {
             fetch('/get_locations')
                 .then(response => response.json())
@@ -47,70 +70,62 @@
                 })
                 .catch(error => console.error('Error loading locations:', error));
         }
-
+    
         function addMarker(location) {
-            console.log("Adding marker for:", location);
             const marker = new google.maps.Marker({
                 position: { lat: location.latitude, lng: location.longitude },
                 map: map,
                 title: location.name
             });
-
+    
             marker.addListener('click', function() {
                 selectedMarker = marker;
                 selectedLocation = location;
                 document.getElementById("locationNameInput").value = location.name || "";
-
-                if (location.id) {
-                    window.location.href = `/app/${location.id}`;
-                }
+                document.getElementById("buildingTypeInput").value = location.building_type || "";
+                document.getElementById("coordsDisplay").innerText = `Lat: ${location.latitude.toFixed(5)}, Lng: ${location.longitude.toFixed(5)}`;
             });
         }
-
+    
         function saveLocation(event) {
-    event.preventDefault(); 
-
-    if (!selectedLocation) {
-        alert("Please click on an existing marker before saving.");
-        return;
-    }
-
-    const customName = document.getElementById("locationNameInput").value.trim();
-    if (!customName) {
-        alert("Please enter a custom name for the location.");
-        return;
-    }
-
-    fetch('/save_location', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            name: customName,
-            latitude: selectedLocation.latitude,
-            longitude: selectedLocation.longitude,
-            locationid: selectedLocation.id
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            alert("Location saved successfully!");
-
-            
-            const listDiv = document.getElementById("savedLocations");
-            const newEntry = document.createElement("p");
-            newEntry.textContent = customName;
-            listDiv.appendChild(newEntry);
-
-            window.location.reload();
-        } else {
-            alert("Error saving location");
+            event.preventDefault();
+    
+            if (!selectedLocation) {
+                alert("Please click on the map to select a location.");
+                return;
+            }
+    
+            const name = document.getElementById("locationNameInput").value.trim();
+            const buildingType = document.getElementById("buildingTypeInput").value.trim();
+    
+            if (!name || !buildingType) {
+                alert("Please enter both name and building type.");
+                return;
+            }
+    
+            fetch('/add_location', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: name,
+                    building_type: buildingType,
+                    latitude: selectedLocation.latitude,
+                    longitude: selectedLocation.longitude
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert("Location saved successfully!");
+                    window.location.reload();
+                } else {
+                    alert("Error saving location.");
+                }
+            })
+            .catch(error => console.error('Error:', error));
         }
-    })
-    .catch(error => console.error('Error:', error));
-}
-
     </script>
+    
 </head>
 <body>
     <div id="sidenav">
@@ -121,24 +136,14 @@
                 </button>
             </form>
         </div>
-        <form action="/save_location/{{location_id}}" method="POST">
-            <input type="text" id="locationNameInput" value="{{location_name}}" name="name" placeholder="Enter a custom name" required />
+        <form onsubmit="saveLocation(event)">
+            <input type="text" id="locationNameInput" name="name" placeholder="Enter a custom name" required />
+            <input type="text" id="buildingTypeInput" name="building_type" placeholder="Enter building type" required />
+            <input type="hidden" id="latitudeInput" name="latitude" />
+            <input type="hidden" id="longitudeInput" name="longitude" />
+            <p id="coordsDisplay" style="margin-top: 5px; font-size: 14px; color: gray;">Click on the map to get coordinates</p>
             <button type="submit" id="saveButton">Save Location</button>
         </form>
-
-        <div style="margin-left: 10px;">
-            <h3>Saved Locations</h3>
-            <div id="savedLocations">
-                {% if locations %}
-                    {% for location in locations %}
-                        <p>{{ location.marker_name }}</p>
-                    {% endfor %}
-                {% else %}
-                    <p>No locations saved yet.</p>
-                {% endif %}
-            </div>
-        </div>
-        
     </div>
     <div id="map"></div>
 </body>
