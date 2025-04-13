@@ -204,45 +204,46 @@ def login_action():
 @app.route('/add_location', methods=['POST'])
 @login_required(Admin)
 def add_location():
-    data = request.get_json()
-    name = data['name']
-    latitude = float(data['latitude'])
-    longitude = float(data['longitude'])
-    building_type = data['building_type'] 
-
-    new_location = Location(name=name, description=building_type, latitude=latitude, longitude=longitude)
+  data = request.get_json()
+  try:
+    new_location = Location(
+        name=data['name'],
+        description=data['building_type'],
+        latitude=data['latitude'],
+        longitude=data['longitude']
+    )
     db.session.add(new_location)
     db.session.commit()
-    if request.is_json:
-        return jsonify(success=True)
-    else:
-        return redirect("/")
+    return jsonify({'success': True})
+  except IntegrityError:
+    db.session.rollback()
+    return jsonify({'success': False, 'message': 'Location already exists at these coordinates.'})
     
 @app.route('/save_location/<int:location_id>', methods=['POST'])
 @login_required(RegularUser)
 def save_location(location_id):
-    data = request.form
-    if not data:
-      return redirect(request.referrer)
-    name = data['name']
-    current_user.add_location(location_id=location_id, name=name)
-    flash('Location Saved!')
-    return redirect(url_for('home'))
+  data = request.form
+  if not data:
+    return redirect(request.referrer)
+  name = data['name']
+  current_user.add_location(location_id=location_id, name=name)
+  flash('Location Saved!')
+  return redirect(url_for('home'))
 
 @app.route('/get_locations', methods=['GET'])
 def get_locations():
-    saved_locations = Location.query.all()
-    location_list=[]
-    for location in saved_locations:
-      temp_dict = {
+  saved_locations = Location.query.all()
+  location_list=[]
+  for location in saved_locations:
+    temp_dict = {
                     "id": location.id,
                     "name": location.name,
                     "latitude": location.latitude,
                     "longitude": location.longitude
                   }
-      location_list.append(temp_dict)
-    print(jsonify({"locations": location_list})) if location_list else print('Nothing')
-    return jsonify({"locations": location_list})
+    location_list.append(temp_dict)
+  print(jsonify({"locations": location_list})) if location_list else print('Nothing')
+  return jsonify({"locations": location_list})
 
 @app.route('/logout', methods=['GET'])
 @jwt_required()
@@ -252,7 +253,44 @@ def logout_action():
   unset_jwt_cookies(response)
   return response
 
+@app.route('/admin/update_location/<int:id>', methods=['POST'])
+@login_required(Admin)
+def update_location(id):
+  location = Location.query.get(id)
+  if not location:
+    flash("Location not found.")
+    return jsonify({'success': False, 'message': 'Location not found'}), 404
+  data = request.get_json()
+  location.name = data['name']
+  location.description = data['building_type']
+  try:
+    db.session.commit()
+    flash("Location updated successfully.")
+    return jsonify({'success': True})
+  except Exception as e:
+    db.session.rollback()
+    flash("Error updating location.")
+    return jsonify({'success': False, 'message': str(e)}), 500
 
 
+
+@app.route('/admin/delete_location/<int:location_id>', methods=['DELETE'])
+@login_required(Admin)
+def delete_location(location_id):
+  location = Location.query.get(location_id)
+  if not location:
+    flash("Location not found.")
+    return jsonify({'success': False, 'message': 'Location not found'}), 404
+  try:
+    db.session.delete(location)
+    db.session.commit()
+    flash("Location deleted successfully.", "success")
+    return jsonify({'success': True})
+  except Exception as e:
+    db.session.rollback()
+    flash("Error deleting location.")
+    return jsonify({'success': False, 'message': str(e)}), 500
+
+    
 if __name__ == '__main__':
   app.run(host='0.0.0.0', port=8080, debug=True)

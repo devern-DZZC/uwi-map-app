@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UWI St. Augustine Map</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <script src="https://maps.googleapis.com/maps/api/js?key={{api_key}}&callback=initMap&libraries=places&loading=async" async defer></script>
     <style>
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
         #sidenav { height: 100%; width: 250px; position: fixed; top: 0; left: 0; background-color: #fafee9; padding-top: 20px; color: black; overflow-y: auto; }
         #map { margin-left: 250px; width: calc(100% - 250px); height: 100vh; }
         #sidenav form { margin: 10px; }
-        #sidenav input, button { margin-top: 10px; padding: 8px; font-size: 16px; width: calc(100% - 20px); border-radius: 5px; }
         #saveButton { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
         #saveButton:hover { background-color: #45a049; }
     </style>
     <script>
         let map, selectedMarker = null, selectedLocation = null;
-    
+        const markerMap = {};
         function initMap() {
             const uwiLocation = { lat: 10.6417, lng: -61.3995 };
             map = new google.maps.Map(document.getElementById("map"), {
@@ -77,10 +77,18 @@
                 map: map,
                 title: location.name
             });
-    
+            
+            markerMap[location.id]=marker;
+
             marker.addListener('click', function() {
                 selectedMarker = marker;
-                selectedLocation = location;
+                selectedLocation = {
+                    id: location.id,
+                    name: location.name,
+                    building_type: location.building_type,
+                    latitude: location.latitude,
+                    longitude: location.longitude
+                };
                 document.getElementById("locationNameInput").value = location.name || "";
                 document.getElementById("buildingTypeInput").value = location.building_type || "";
                 document.getElementById("coordsDisplay").innerText = `Lat: ${location.latitude.toFixed(5)}, Lng: ${location.longitude.toFixed(5)}`;
@@ -102,7 +110,14 @@
                 alert("Please enter both name and building type.");
                 return;
             }
-    
+            for (let id in markerMap) {
+                const marker = markerMap[id];
+                const pos = marker.getPosition();
+                if (Math.abs(pos.lat() - selectedLocation.latitude) < 0.00001 && Math.abs(pos.lng() - selectedLocation.longitude) < 0.00001) {
+                    alert("A location already exists at these coordinates.");
+                    return;
+                }
+            }
             fetch('/add_location', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -124,6 +139,70 @@
             })
             .catch(error => console.error('Error:', error));
         }
+
+        function updateLocation() {
+            if (!selectedLocation || !selectedLocation.id) {
+                alert("Please select a saved marker to update.");
+                return;
+            }
+
+            const name = document.getElementById("locationNameInput").value.trim();
+            const buildingType = document.getElementById("buildingTypeInput").value.trim();
+
+            if (!name || !buildingType) {
+                alert("Please enter both name and building type.");
+                return;
+            }
+
+        fetch(`/admin/update_location/${selectedLocation.id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: name,
+                building_type: buildingType
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Location updated successfully!");
+                window.location.reload();
+            } else {
+                alert("Error updating location.");
+            }
+        })
+        .catch(error => console.error('Update error:', error));
+        }
+
+    function deleteLocation() {
+        if (!selectedLocation || !selectedLocation.id) {
+            alert("Please select a saved marker to delete.");
+            return;
+        }
+        if (!confirm("Are you sure you want to delete this location?")) return;
+        fetch(`/admin/delete_location/${selectedLocation.id}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("Location deleted successfully!");
+                if(markerMap[selectedLocation.id]){
+                    markerMap[selectedLocation.id].setMap(null);
+                    delete markerMap[selectedLocation.id];
+                }
+                selectedLocation=null;
+                selectedMarker=null;
+                document.getElementById("locationNameInput").value = "";
+                document.getElementById("buildingTypeInput").value = "";
+                document.getElementById("coordsDisplay").innerText = "Click on the map to get coordinates";           
+            } else {
+                alert("Error deleting location.");
+            }
+        })
+        .catch(error => console.error('Delete error:', error));
+    }
+
     </script>
     
 </head>
@@ -131,7 +210,7 @@
     <div id="sidenav">
         <div style="margin: 0 10px 20px 10px;">
             <form action="/logout" method="GET">
-                <button type="submit" style="width: 100%; padding: 8px; font-size: 16px; background-color: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                <button type="submit" class="red lighten-1 btn">
                     Logout
                 </button>
             </form>
@@ -142,8 +221,11 @@
             <input type="hidden" id="latitudeInput" name="latitude" />
             <input type="hidden" id="longitudeInput" name="longitude" />
             <p id="coordsDisplay" style="margin-top: 5px; font-size: 14px; color: gray;">Click on the map to get coordinates</p>
-            <button type="submit" id="saveButton">Save Location</button>
+            <button type="submit" id="saveButton" class="teal btn" style="margin-top: 10px;">Save Location</button>
+            <button type="button" class="teal btn" style="margin-top: 10px;" onclick="updateLocation()">Update Location</button>
+            <button type="button" class="teal btn" style="margin-top: 10px;" onclick="deleteLocation()">Delete Location</button>
         </form>
+        
     </div>
     <div id="map"></div>
 </body>
