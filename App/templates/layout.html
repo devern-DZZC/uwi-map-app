@@ -46,27 +46,23 @@
   <body>
     <ul id="slide-out" class="sidenav">
       {% if is_authenticated %}
+      <h1> WiGo </h1>
           {% if is_regular_user %}
-            <li><a href="/home">Home</a></li>
-            <li><a href="/profile">Profile</a></li>
-            <li><a href="/user_location">My Locations</a></li>
-            <li><a href="/about">About WiGo</a></li>
+            <li> Hi, {{User.username}}</li>
+            <li> Where are you going? </li>
             <li><a href="/logout">Logout</a></li>
           {% endif %}
 
           {% if is_admin %} 
-              <li><a href="/home">Home</a></li>
+              <li><a href="/app">Home</a></li>
               <li><a href="/users">View Profiles</a></li>
-              <li><a href="/edit_locations">Edit Locations</a></li>
-              <li><a href="/about">About WiGo</a></li>
               <li><a href="/logout">Logout</a></li>
           {% endif %}
   
       {% else %}
         <a href="#!" class="brand-logo center" class="home">{% block page %}"wigo logo draft 1.png"{% endblock %}</a>
-        <li><a href="/">Login</a></li>
+        <li><a href="/login">Login</a></li>
         <li><a href="/signup">Signup</a></li>
-        <li><a href="/about">About WiGo</a></li>
       {% endif %}
     </ul>
 
