@@ -5,6 +5,7 @@ from sqlalchemy.exc import OperationalError, IntegrityError
 from App.models import db, User, Location, UserLocation, Admin, RegularUser
 from datetime import timedelta
 from functools import wraps
+from dotenv import load_dotenv
 
 from flask_jwt_extended import (
     JWTManager,
@@ -17,6 +18,8 @@ from flask_jwt_extended import (
     current_user,
 )
 
+load_dotenv()
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 
 def create_app():
   app = Flask(__name__, static_url_path='/static')
@@ -145,7 +148,8 @@ def home(location_id=None):
         current_user=current_user,
         locations=UserLocation.query.filter_by(user_id=current_user.id).all(),
         location_id=location_id,
-        location_name = location_name
+        location_name = location_name,
+        api_key = GOOGLE_MAPS_API_KEY
     )
 
 
@@ -156,7 +160,7 @@ def signup():
 @app.route('/admin')
 @login_required(Admin)
 def admin():
-  return render_template('admin.html')
+  return render_template('admin.html', api_key = GOOGLE_MAPS_API_KEY)
 
 
 @app.route('/signup', methods=['POST'])
