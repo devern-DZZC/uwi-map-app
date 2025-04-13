@@ -12,3 +12,4 @@ Flask-Reuploaded==1.2.0
 psycopg2-binary
 pytest==7.0.1
 Werkzeug==3.0.1
+Flask-Admin==1.6.1
