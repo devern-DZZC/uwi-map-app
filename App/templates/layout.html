@@ -37,6 +37,98 @@
       .sidenav {
         background-color: #DAD7CD;
       }
+
+      h5 {
+        margin-right: 50px;
+        padding: 25px;
+        height: auto;
+        width: auto;
+        align-self: center;
+        background-color: #344E41;
+        color: #DAD7CD; 
+        font-weight: 200;
+        border-radius: 2px;
+      }
+
+      .prompt p {
+        width: max-content;
+        height: auto;
+        margin: 5px;
+        padding: 5px;
+        font-size: medium;
+        font-style: oblique;
+        color: #3A5A40;
+      }
+
+      .prompt {
+        display: flex;
+        flex-direction: column;
+        justify-content: center; 
+        align-items: center;     
+        height: 75vh;
+        text-align: center;
+      }
+
+      .prompt a{
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        margin-top: 20px;
+        cursor: pointer;
+        color: #DAD7CD; 
+        background-color: #A3B18A;
+      }
+
+      .filter-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .filter-buttons button {
+        background: #A3B18A;
+        border: 2px solid black;
+        padding: 10px 20px;
+        border-radius: 15px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+      .filter-buttons button.active,
+      .filter-buttons button:hover {
+        background: #3A5A40;
+        color: #DAD7CD;
+      }
+
+      .locations-container {
+        max-width: 400px;
+        margin: auto;
+        text-align: left;
+      }
+
+      .location-item {
+        display: flex;
+        align-items: center;
+        border: 2px solid black;
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-bottom: 15px;
+        background-color: #A3B18A;
+      }
+
+      .circle {
+        height: 24px;
+        width: 24px;
+        border: 3px solid black;
+        border-radius: 50%;
+        margin-right: 16px;
+      }
+
+      .sub-header {
+        font-size:large;
+        width: 100%;
+        background-color: #3A5A40;
+        color: #DAD7CD;
+      }
     </style>
 
     <meta charset="UTF-8">
@@ -46,23 +138,55 @@
   <body>
     <ul id="slide-out" class="sidenav">
       {% if is_authenticated %}
-      <h1> WiGo </h1>
           {% if is_regular_user %}
-            <li> Hi, {{User.username}}</li>
-            <li> Where are you going? </li>
+            <div id= "greeting">
+              <h5> WiGo </h5>
+              <p> Hello, {{User.username}}</p>
+              <p> How can I guide you today? </p>
+            </div>
+
+            <div class="filter-buttons">
+              <div class="sub-header">
+                <p> Filter By </p>
+              </div>
+              <button onclick="filterLocations('faculty')">◆ Faculties</button>
+              <button onclick="filterLocations('building')">◆ Buildings </button>
+              <button onclick="filterLocations('field')">◆ Fields </button>
+              <button onclick="filterLocations('classroom')">◆ Classrooms </button>
+              <button onclick="filterLocations('auditorium')">◆ Auditoriums </button>
+              <button onclick="filterLocations('library')">◆ Libraries </button>
+              <button onclick="filterLocations('car park')">◆ Car Parks </button>
+            </div>
+
+            <div class = "location-container">
+              <div class="sub-header">
+                <p> My Locations </p>
+              </div>
+              {% for location in RegularUser.locations %}
+                <div class="location-item">
+                  <span class="circle"></span>
+                  <p>{{ location }}</p>
+                </div>
+              {% endfor %}
+            </div>
+
             <li><a href="/logout">Logout</a></li>
           {% endif %}
-
           {% if is_admin %} 
-              <li> Hi, {{User.username}}</li>
+              <p> Hi, {{User.username}}</p>
               <li><a href="/users">View Profiles</a></li>
               <li><a href="/logout">Logout</a></li>
           {% endif %}
-  
-      {% else %}
-        <a href="#!" class="brand-logo center" class="home">{% block page %}"wigo logo draft 1.png"{% endblock %}</a>
-        <li><a href="/login">Login</a></li>
-        <li><a href="/signup">Signup</a></li>
+      {% endif %}
+     
+      {% if not is_authenticated %}
+        <div> 
+          <h5>  WiGo  </h5>
+          <div class="prompt">
+            <p> Login to access all WiGo features </p>
+            <li><a href="/login">Let's go!</a></li>
+          </div>
+        </div>
       {% endif %}
     </ul>
 
@@ -76,6 +200,26 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
     <script>
+
+      function filterLocations(type) {
+        const locations = document.querySelectorAll('.location');
+        const buttons = document.querySelectorAll('.filter-buttons button');
+
+        // Toggle button highlight
+        buttons.forEach(btn => {
+          btn.classList.toggle('active', btn.innerText.includes(type));
+        });
+
+        // Show/hide based on filter
+        locations.forEach(loc => {
+          if (loc.dataset.type === type) {
+            loc.style.display = 'block';
+          } else {
+            loc.style.display = 'none';
+          }
+        });
+      }
+
       document.addEventListener('DOMContentLoaded', function () {
         const elems = document.querySelectorAll('.sidenav');
         const instances = M.Sidenav.init(elems, { edge: 'left' });
