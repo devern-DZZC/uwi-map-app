@@ -84,6 +84,7 @@
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
+        margin: 10px;
       }
       .filter-buttons button {
         background: #A3B18A;
@@ -99,9 +100,9 @@
         color: #DAD7CD;
       }
 
-      .locations-container {
+      .location-container {
         max-width: 400px;
-        margin: auto;
+        margin: 10px;
         text-align: left;
       }
 
@@ -116,8 +117,8 @@
       }
 
       .circle {
-        height: 24px;
-        width: 24px;
+        height: 14px;
+        width: 14px;
         border: 3px solid black;
         border-radius: 50%;
         margin-right: 16px;
@@ -125,9 +126,18 @@
 
       .sub-header {
         font-size:large;
+        font-style: italic;
+        font-weight: 500;
         width: 100%;
-        background-color: #3A5A40;
-        color: #DAD7CD;
+        height: 100%;
+        color: #3A5A40;
+      }
+
+      .welcomemsg {
+        margin: 10px;
+        color:#344E41;
+        font-size: small;
+        font-weight: 500;
       }
     </style>
 
@@ -139,10 +149,12 @@
     <ul id="slide-out" class="sidenav">
       {% if is_authenticated %}
           {% if is_regular_user %}
-            <div id= "greeting">
+            <div class= "greeting">
               <h5> WiGo </h5>
-              <p> Hello, {{User.username}}</p>
-              <p> How can I guide you today? </p>
+              <div class="welcomemsg">
+                <p> Hello, {{User.username}}</p>
+                <p> How can I guide you today? </p>
+              </div>
             </div>
 
             <div class="filter-buttons">
@@ -173,13 +185,17 @@
             <li><a href="/logout">Logout</a></li>
           {% endif %}
           {% if is_admin %} 
-              <p> Hi, {{User.username}}</p>
+              <div class= "greeting">
+                <h5> WiGo </h5>
+                <div class="welcomemsg">
+                  <p> Welcome back, {{User.username}}</p>
+                </div>
+              </div>
               <li><a href="/users">View Profiles</a></li>
               <li><a href="/logout">Logout</a></li>
           {% endif %}
-      {% endif %}
      
-      {% if not is_authenticated %}
+      {% else %}
         <div> 
           <h5>  WiGo  </h5>
           <div class="prompt">
