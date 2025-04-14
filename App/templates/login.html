@@ -1,33 +1,326 @@
-{% extends "layout.html" %}
-{% block title %}Login{% endblock %}
-{% block page %}Login{% endblock %}
+<!doctype html>
+<html>
+  <head>
+ <!--  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"> --> 
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-{% block link%}
-    <ul id="nav-mobile" class="right">
-        <li><a href="/signup">Signup</a></li>
-    </ul>
-{% endblock %}
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TweenMax.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/2.1.3/TimelineLite.min.js"></script>
 
+    <style>
+      @font-face {
+        font-family: 'Corbert Black';
+        src: url('/static/fonts/Corbert_Black.otf') format('opentype');
+      }
 
-{% block content %}
-<main class="container" style="margin-top:100px">
-   <form class="card col s12" id="loginForm" method="POST" action="/login" style="padding:1em">
+      @font-face {
+        font-family: 'Almarose';
+        src: url('/static/fonts/Almarose_Medium.otf') format('opentype');
+      }
 
-      <div class="row">
-        <div class="input-field col s12">
-          <input name="username" type="text" class="validate">
-          <label for="first_name"> Username </label>
+      body, html{
+        height: 100%;
+      }
+
+      body{
+        font-family: 'Corbert Black';
+        background-color: #fff;
+        color: #403e4b;
+        overflow: hidden;
+      }
+
+      h1, h2{
+        font-family: 'Corbert Black';
+      }
+
+      p, span, a{
+        font-family: 'Almarose';
+      }
+
+      .btn{
+        background-color: #3196de; 
+        color: white;
+        font-family: 'Corbert Black';
+        transition: 0.3s ease-in-out;
+      }
+
+      .btn:hover{
+        background-color: #f68630;
+        box-shadow: 0 3px 3px rgba(227, 159, 41, 0.6);
+      }
+
+      .alt-text{
+        font-size: 2.0vmin; 
+      }
+
+      .alt-text span{
+        color: #bac5c6;
+      }
+
+      .slide{ 
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-wrap: wrap;
+        flex-direction: column;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      .card{
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        background-color: #fff;
+        margin: 0;
+        align-items: center;
+      }
+
+      .card__img{
+        background-position: center;
+        width: 50%;
+        height: 100%;
+        background-size: cover;
+        background-repeat: no-repeat;  
+      }
+
+      #img01{
+        background-image: url("https://d3f013qimivxj3.cloudfront.net/uwigamechangers.com/wp-content/uploads/2022/07/25220112/small-IMG_7764-copy.jpg");
+      }
+
+      #img02{
+        background-image: url("https://d3f013qimivxj3.cloudfront.net/uwigamechangers.com/wp-content/uploads/2022/07/25195234/37739132_10155920129383893_6703545394653036544_n-1536x1085.jpg");
+      }
+
+      .card__content{
+        padding: 10% 5%;
+        box-sizing: border-box;
+        width: 50%;
+        text-align: center;
+      }
+
+      .card__content-theme{
+        font-weight: 900;
+        font-size: 2.7vmin; 
+      }
+
+      .card__content-header{
+        font-weight: 900;
+        font-size: 54px;
+        font-size: 7vmin;
+        text-transform: capitalize;
+        letter-spacing: 0.01em;
+        line-height: 0.91;
+        margin: 3vmin 0 3.5vmin;  
+      }
+
+      .card__content-paragraph{
+        font-size: 1.6vmin;
+        line-height: 1.7;
+        font-weight: 300;
+        margin-bottom: 2.5vmin;
+      }
+
+      .card__content-link{
+        color: #BA3428;
+        font-size: 1.8vmin;
+        display: block;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+
+        &:hover{
+          opacity: 1;
+        }
+      }
+
+      .prevnext{
+        position: absolute;
+        width: 4vmin;
+        height: 8vmin;
+        right: 2%;
+        bottom: 0;
+        top: 0;
+        margin: auto 0;
+      }
+
+      .prevnext-button{
+        width: 100%;
+        height: 50%;
+        border: 0;
+        background-color: transparent;
+        font-size: 20px;
+      }
+
+      #prev, .next-slide{
+        position: relative;
+        cursor: pointer;
+        
+        &:hover{
+          text-decoration: underline;
+          &:after, &:after{
+            opacity: 1;
+          }
+        }
+      }
+
+      #prev:after, .next-slide:after{
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        margin: auto;
+        opacity: 0.6;
+        transition: opacity 0.3s ease;
+      }
+    </style>
+
+    <meta charset="UTF-8">
+    <title>{% block title %}WiGo - Your Smart Campus Companion{% endblock %}</title>
+  </head>
+
+  <body>
+    <div id="slide1" class="slide active">
+      <div class="card">
+        <div class="card__img" id="img01"></div>
+        <div class="card__content">
+          <h2 class="card__content-header">Welcome to WiGo</h2>
+          <p class="card__content-theme">Log in to your account</p>
+          
+            <form  id="loginForm" method="POST" action="/login" style="padding:1em">
+              <div class="row">
+                <div class="input-field col s12">
+                  <input placeholder="Username" name="username" type="text" class="validate">
+                  <label for="first_name"></label>
+                </div>
+              </div>
+              <div class="row">
+                <div class="input-field col s12">
+                  <input placeholder="Password" name="password" type="password" class="validate">
+                  <label for="password"></label>
+                </div>
+              </div>
+              <div class="card-action">
+                <input type="submit" value="Let's Go" class="btn">
+              </div>
+          </form>
+
+          <div class="alt-text">
+            <span>Don't have an account yet?</span> <a href="#" onclick="event.preventDefault(); goToNextSlide($('#slide1'), $('#slide2'));">Sign up</a>
+          </div>
+
         </div>
       </div>
-      <div class="row">
-        <div class="input-field col s12">
-          <input name="password" type="password" class="validate">
-          <label for="password"> Password </label>
+    </div>
+    
+
+    <div id="slide2" class="slide">
+      <div class="card">
+        <div class="card__img" id="img02"></div>
+        <div class="card__content">
+          <h2 class="card__content-header">Welcome to WiGo</h2>
+          <p class="card__content-theme">Create your account</p>
+          
+            <form  id="loginForm" method="POST" action="/signup" style="padding:1em">
+              <div class="row">
+                <div class="input-field col s12">
+                  <input placeholder="Username" name="username" type="text" class="validate">
+                  <label for="first_name"></label>
+                </div>
+              </div>
+              <div class="row">
+                <div class="input-field col s12">
+                  <input placeholder="Password" name="password" type="password" class="validate">
+                  <label for="password"></label>
+                </div>
+              </div>
+              <div class="card-action">
+                <input type="submit" value="Let's Go" class="btn">
+              </div>
+          </form>
+
+          <div class="alt-text">
+            <span>Already have an account?</span> <a href="#" onclick="event.preventDefault(); goToPreviousSlide($('#slide2'), $('#slide1'));">Log in</a>
+          </div>
+
         </div>
       </div>
+<<<<<<< HEAD
+    </div>
+    
+
+    <script>
+      var $slideNavPrev = $("#slide1"),
+          $slideNavNext = $("#slide2");
+
+      function init(){
+        TweenMax.set($slideNavNext, {autoAlpha: 0});
+        TweenMax.set($slideNavPrev, {autoAlpha: 1});
+	      $slideNavPrev.addClass('active');
+      }
+	
+	    $(document).ready(init);
+     
+      function goToNextSlide(slidePrev, slideNext){
+        var tl = new TimelineLite(),
+          slidePrevContent = slidePrev.find('.card__content'),
+          slideNextContent = slideNext.find('.card__content'),
+          slidePrevImg = slidePrev.find('.card__img'),
+          slideNextImg = slideNext.find('.card__img');
+          slidePrev.find('form')[0].reset();
+
+          tl
+            .set(slideNext, {autoAlpha: 1, className: '+=active'})
+            .set(slidePrev, {className: '-=active'})
+            .to(slidePrevContent, 0.65, {y: '+=40px', ease:Power3.easeInOut}, 0)
+            .to(slidePrevImg, 0.65, {backgroundPosition: 'bottom', ease:Power3.easeInOut}, 0)
+            .to(slidePrev, 1, {y: '-=100%', ease:Power3.easeInOut}, 0)
+	          .to(slideNext, 1, {y: '-=100%', ease:Power3.easeInOut}, 0)
+            .fromTo(slideNextContent, 0.65, {y: '-=40px'}, {y: 0, ease:Power3.easeInOut}, "-=0.7")
+            .fromTo(slideNextImg, 0.65, {backgroundPosition: 'top'}, {backgroundPosition: 'bottom', ease:Power3.easeInOut}, "-=0.7")
+         
+          TweenMax.set($slideNavPrev, {autoAlpha: 0.8});
+      };
+
+      function goToPreviousSlide(slidePrev, slideNext){
+        var tl = new TimelineLite(),
+          slidePrevContent = slidePrev.find('.card__content'),
+          slideNextContent = slideNext.find('.card__content'),
+          slidePrevImg = slidePrev.find('.card__img'),
+          slideNextImg = slideNext.find('.card__img');
+          slidePrev.find('form')[0].reset();
+
+          tl
+            .set(slideNext, {autoAlpha: 1, className: '+=active'})
+            .set(slidePrev, {className: '-=active'})
+            .to(slidePrevContent, 0.65, {y: '-=40px', ease:Power3.easeInOut}, 0)
+            .to(slidePrevImg, 0.65, {backgroundPosition: 'top', ease:Power3.easeInOut}, 0)
+		        .to(slidePrev, 1, {y: '+=100%', ease:Power3.easeInOut}, 0)
+            .to(slideNext, 1, {y: '+=100%', ease:Power3.easeInOut}, 0)
+            .fromTo(slideNextContent, 0.65, {y: '+=40px'}, {y: 0, ease:Power3.easeInOut}, "-=0.7")
+            .fromTo(slideNextImg, 0.65, {backgroundPosition: 'bottom'}, {backgroundPosition: 'top', ease:Power3.easeInOut}, "-=0.7")
+          
+          TweenMax.set($slideNavPrev, {autoAlpha: 0.8});
+          setTimeout(init, 800);
+      };
+     </script> 
+     
+  </body>
+</html>
+=======
       <div class="card-action">
         <input type="submit" class="green darken-1 btn">
       </div>
   </form>
 </main> 
 {% endblock %}
+>>>>>>> 2a5346e728f3df77d5a71884307ae6379cffedbf
