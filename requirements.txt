@@ -3,6 +3,7 @@ Flask==3.0.0
 Flask-Cors==4.0.0
 Flask-JWT-Extended==4.6.0
 Flask-SQLAlchemy==3.0.1
+SQLAlchemy>=1.4,<2.0
 gunicorn==20.1.0
 itsdangerous==2.1.2
 python-dotenv==0.21.1
@@ -10,6 +11,5 @@ Flask-Migrate==3.1.0
 Flask-Reuploaded==1.2.0
 psycopg2-binary
 pytest==7.0.1
-python-dotenv==0.21.1
-Flask-Migrate==3.1.0
 Werkzeug==3.0.1
+Flask-Admin==1.6.1

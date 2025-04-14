@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import UniqueConstraint
 from werkzeug.security import generate_password_hash, check_password_hash
 
 db = SQLAlchemy()
@@ -59,7 +60,9 @@ class Location(db.Model):
     longitude = db.Column(db.Float, nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     description = db.Column(db.String(120), nullable=False)
-
+    __table_args__ = (
+        UniqueConstraint('latitude', 'longitude', name='unique_lat_lng'),
+    )
     users = db.relationship('UserLocation', back_populates='location')
 
     def __init__(self, name, longitude, latitude, description):
@@ -67,6 +70,7 @@ class Location(db.Model):
         self.longitude = longitude
         self.latitude = latitude
         self.description=description
+     
 
 class UserLocation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
