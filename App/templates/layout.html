@@ -109,7 +109,7 @@
       .location-item {
         display: flex;
         align-items: center;
-        border: 2px solid black;
+        border: 2px solid black; 
         border-radius: 12px;
         padding: 12px 16px;
         margin-bottom: 15px;
@@ -139,6 +139,11 @@
         font-size: small;
         font-weight: 500;
       }
+
+      .place-info {
+        margin: 10px;
+        color: #344E41;
+      }
     </style>
 
     <meta charset="UTF-8">
@@ -155,6 +160,11 @@
                 <p> Hello, {{User.username}}</p>
                 <p> How can I guide you today? </p>
               </div>
+            </div>
+
+            <div class= "place-info">
+              <img id="place-photo" src="placeholder.jpg" alt="Place photo" style="width:100%; margin-top:10px;" />
+              <div id="place-name"> Please choose a location </div>
             </div>
 
             <div class="filter-buttons">
@@ -188,7 +198,7 @@
               <div class= "greeting">
                 <h5> WiGo </h5>
                 <div class="welcomemsg">
-                  <p> Welcome back, {{User.username}}</p>
+                  <p> Welcome Admin, {{User.username}}</p>
                 </div>
               </div>
               <li><a href="/users">View Profiles</a></li>
@@ -215,6 +225,11 @@
     </main>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCrGcU6ZyQJDjRxsm0xTkCSWAynJwHpF24&libraries=places"
+      async
+      defer>
+    </script>
     <script>
 
       function filterLocations(type) {
@@ -251,6 +266,58 @@
           }
         });
       });
+
+      let map;
+      let infowindow;
+      let service;
+
+      function initMap() {
+        const center = { lat: 40.7128, lng: -74.0060 }; // Example: NYC
+
+        map = new google.maps.Map(document.getElementById("map"), {
+          center,
+          zoom: 13,
+        });
+
+        infowindow = new google.maps.InfoWindow();
+
+        // Add a click listener
+        map.addListener("click", function (event) {
+          const latlng = event.latLng;
+
+          const request = {
+            location: latlng,
+            radius: '50',
+          };
+
+          service = new google.maps.places.PlacesService(map);
+          service.nearbySearch(request, function (results, status) {
+            if (status === google.maps.places.PlacesServiceStatus.OK && results.length > 0) {
+              const place = results[0];
+              document.getElementById("place-name").textContent = place.name;
+
+              // Handle photo
+              const photoEl = document.getElementById("place-photo");
+              if (place.photos && place.photos.length > 0) {
+                const photoUrl = place.photos[0].getUrl({ maxWidth: 400 });
+                photoEl.src = photoUrl;
+              } else {
+                photoEl.src = "placeholder.jpg"; // fallback image
+              }
+
+              infowindow.setContent(place.name);
+              infowindow.setPosition(place.geometry.location);
+              infowindow.open(map);
+            } else {
+              document.getElementById("place-name").textContent = "No place found at this location.";
+              document.getElementById("place-photo").src = "placeholder.jpg";
+            }
+          });
+        });
+      }
+
+      // Load map when API script is ready
+      window.initMap = initMap;
     </script>
   </body>
 </html>
