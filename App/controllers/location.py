@@ -53,3 +53,29 @@ def parse_locations():
 
         db.session.add_all(locations)
         db.session.commit()
+
+
+def update_location_by_id(loc_id, name, building_type):
+    location = get_location(loc_id)
+    if not location:
+        return None, "Location not found"
+    location.name = name
+    location.description = building_type
+    try:
+        db.session.commit()
+        return location, None
+    except Exception as e:
+        db.session.rollback()
+        return None, str(e)
+
+def delete_location_by_id(loc_id):
+    location = get_location(loc_id)
+    if not location:
+        return None, "Location not found"
+    try:
+        db.session.delete(location)
+        db.session.commit()
+        return True, None
+    except Exception as e:
+        db.session.rollback()
+        return False, str(e)

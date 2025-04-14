@@ -13,6 +13,29 @@
         #sidenav form { margin: 10px; }
         #saveButton { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
         #saveButton:hover { background-color: #45a049; }
+        #flashed-messages {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999; 
+            width: 80%; 
+            max-width: 600px; 
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #flashed-messages .alert {
+            background-color: #f2f2f2;
+            color: black;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 0;
+        }
+
     </style>
     <script>
         let map, selectedMarker = null, selectedLocation = null;
@@ -131,7 +154,6 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert("Location saved successfully!");
                     window.location.reload();
                 } else {
                     alert("Error saving location.");
@@ -165,7 +187,6 @@
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert("Location updated successfully!");
                 window.location.reload();
             } else {
                 alert("Error updating location.");
@@ -179,14 +200,12 @@
             alert("Please select a saved marker to delete.");
             return;
         }
-        if (!confirm("Are you sure you want to delete this location?")) return;
         fetch(`/admin/delete_location/${selectedLocation.id}`, {
             method: 'DELETE'
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert("Location deleted successfully!");
                 if(markerMap[selectedLocation.id]){
                     markerMap[selectedLocation.id].setMap(null);
                     delete markerMap[selectedLocation.id];
@@ -195,18 +214,37 @@
                 selectedMarker=null;
                 document.getElementById("locationNameInput").value = "";
                 document.getElementById("buildingTypeInput").value = "";
-                document.getElementById("coordsDisplay").innerText = "Click on the map to get coordinates";           
+                document.getElementById("coordsDisplay").innerText = "Click on the map to get coordinates"; 
+                window.location.reload();
             } else {
                 alert("Error deleting location.");
             }
         })
         .catch(error => console.error('Delete error:', error));
     }
-
+            window.onload = function() {
+            const flashMessages = document.getElementById('flashed-messages');
+            if (flashMessages) {
+            setTimeout(() => {
+                flashMessages.style.display = 'none';
+            }, 5000); 
+            }
+        }
     </script>
     
 </head>
 <body>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div id="flashed-messages">
+                {% for message in messages %}
+                <div class="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
     <div id="sidenav">
         <div style="margin: 0 10px 20px 10px;">
             <form action="/logout" method="GET">

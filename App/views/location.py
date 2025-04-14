@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify, request,flash
 from App.controllers import get_locations, login_required, add_location
 from App.models import Admin
 
@@ -15,6 +15,7 @@ def add_new_location():
   data = request.get_json()
   try:
     add_location(name=data['name'], lat=data['latitude'], lon=data['longitude'], description=data['building_type'])
+    flash('Location Added Successfully!')
     return jsonify({'success': True})
   except:
     return jsonify({'success': False, 'message': 'Location already exists at these coordinates.'})
