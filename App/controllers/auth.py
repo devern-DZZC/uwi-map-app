@@ -28,9 +28,7 @@ def login_admin(username, password):
 
 def signup(username, password):
     user = create_user(username=username, password=password)
-    if user:
-       return user
-    return None
+    return user
 
 def regularUser_required(func):
     @wraps(func)
