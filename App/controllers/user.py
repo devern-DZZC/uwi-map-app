@@ -1,8 +1,14 @@
-from App.models import User
+from App.models import User, RegularUser, Admin
 from App.database import db
 
 def create_user(username, password):
-    newuser = User(username=username, password=password)
+    newuser = RegularUser(username=username, password=password)
+    db.session.add(newuser)
+    db.session.commit()
+    return newuser
+
+def create_admin(staff_id, username, password):
+    newuser = Admin(staff_id=staff_id, username=username, password=password)
     db.session.add(newuser)
     db.session.commit()
     return newuser
@@ -30,4 +36,3 @@ def update_user(id, username):
         db.session.add(user)
         return db.session.commit()
     return None
-    
