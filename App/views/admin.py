@@ -1,19 +1,16 @@
-from flask_admin.contrib.sqla import ModelView
-from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies
-from flask_admin import Admin
-from App.models import db, User
+from flask import Blueprint, redirect, render_template, request, send_from_directory, jsonify
+from App.controllers import create_user, initialize, get_location, get_user_locations, admin_required, login_required
+from flask_jwt_extended import current_user, jwt_required
+import os
+from dotenv import load_dotenv
+from App.models import Admin
 
-class AdminView(ModelView):
+load_dotenv()
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 
-    @jwt_required()
-    def is_accessible(self):
-        return current_user is not None
+admin_views = Blueprint('admin_views', __name__, template_folder='../templates')
 
-    def inaccessible_callback(self, name, **kwargs):
-        # redirect to login page if user doesn't have access
-        flash("Login to access admin")
-        return redirect(url_for('index_page', next=request.url))
-
-def setup_admin(app):
-    admin = Admin(app, name='FlaskMVC', template_mode='bootstrap3')
-    admin.add_view(AdminView(User, db.session))
+@admin_views.route('/admin')
+@login_required(Admin)
+def admin():
+  return render_template('admin.html', api_key = GOOGLE_MAPS_API_KEY)
