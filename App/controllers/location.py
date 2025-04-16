@@ -48,7 +48,6 @@ def parse_locations():
             lat, lon = float(coords[0]), float(coords[1])
             
             if lon is not None and lat is not None:
-                print(f"Location: {name}, Description: {building_type}, Coordinates: ({lat}, {lon})")
                 location = Location(name=name, latitude=lat, longitude=lon, description=building_type)
                 locations.append(location)
 
