@@ -96,8 +96,8 @@ def get_directions(origin, destination):
     print(dest_coords)
 
     params = {
-        'origin': location1.name,
-        'destination': location2.name,
+        'origin': origin_coords,
+        'destination': dest_coords,
         'key': GOOGLE_MAPS_API_KEY
     }
 
