@@ -1,5 +1,5 @@
-from flask import Blueprint, redirect, render_template, request, send_from_directory, jsonify, flash, url_for
-from App.controllers import create_user, initialize, get_location, get_user_locations, login_required
+from flask import Blueprint, redirect, render_template, request, send_from_directory, jsonify, flash, url_for, session
+from App.controllers import create_user, initialize, get_location, get_user_locations, login_required, get_locations, get_directions
 from flask_jwt_extended import current_user, jwt_required
 import os
 from dotenv import load_dotenv
@@ -14,6 +14,7 @@ index_views = Blueprint('index_views', __name__, template_folder='../templates')
 @index_views.route("/app/<int:location_id>", methods=['GET'])
 @login_required(RegularUser)
 def home(location_id=None):
+    route = session.pop('route', None)
     if location_id:
       location = get_location(location_id)
       location_name = location.name
@@ -27,6 +28,8 @@ def home(location_id=None):
         locations=get_user_locations(current_user.id),
         location_id=location_id,
         location_name = location_name,
+        all_locations = get_locations(),
+        route = route,
         api_key = GOOGLE_MAPS_API_KEY
     )
 
@@ -35,6 +38,14 @@ def init():
     initialize()
     return jsonify(message='db initialized!')
 
+@index_views.route('/get-route', methods=['POST'])
+def get_route():
+    origin = request.form['route1']
+    destination = request.form['route2']
+    
+    route_data = get_directions(origin, destination)
+    session['route'] = route_data 
+    return  redirect(url_for('index_views.home'))
 @index_views.route('/save_location/<int:location_id>', methods=['POST'])
 @login_required(RegularUser)
 def save_location(location_id):

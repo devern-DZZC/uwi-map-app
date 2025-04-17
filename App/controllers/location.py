@@ -1,6 +1,10 @@
 from App.models import Location, RegularUser
 from App.database import db
-import csv
+import csv, os, requests
+from dotenv import load_dotenv
+
+load_dotenv()
+GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 
 def add_location(name, lat, lon, description):
     try:
@@ -79,3 +83,23 @@ def delete_location_by_id(loc_id):
     except Exception as e:
         db.session.rollback()
         return False, str(e)
+    
+def get_directions(origin, destination):
+    endpoint = f"https://maps.googleapis.com/maps/api/directions/json"
+    location1 = Location.query.get(origin)
+    location2 = Location.query.get(destination)
+
+    origin_coords = str(location1.latitude) + "," + str(location1.longitude)
+    dest_coords = str(location2.latitude) + "," + str(location2.longitude)
+
+    print(origin_coords)
+    print(dest_coords)
+
+    params = {
+        'origin': location1.name,
+        'destination': location2.name,
+        'key': GOOGLE_MAPS_API_KEY
+    }
+
+    response = requests.get(endpoint, params=params)
+    return response.json()

@@ -36,60 +36,157 @@
             margin: 0;
         }
     </style>
-    <script>
-        let map, selectedMarker = null, selectedLocation = null;
+</head>
+<body>
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <div id="flashed-messages">
+                {% for message in messages %}
+                <div class="alert">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endwith %}
 
-        function initMap() {
-            const uwiLocation = { lat: 10.6417, lng: -61.3995 };
-            map = new google.maps.Map(document.getElementById("map"), {
-                center: uwiLocation,
-                zoom: 15,
-                mapTypeId: "roadmap",
-                restriction: {
-                    latLngBounds: {
-                        north: 10.6455, south: 10.6340, west: -61.4070, east: -61.3920
-                    },
-                    strictBounds: true
+    <div id="route-data" data-route='{{ route | tojson | safe }}' style="display: none;"></div>
+
+    <div id="sidenav">
+        <div style="margin: 0 10px 20px 10px;">
+            <form action="/logout" method="GET">
+                <button type="submit" style="width: 100%; padding: 8px; font-size: 16px; background-color: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Logout
+                </button>
+            </form>
+        </div>
+        <form action="/save_location/{{location_id}}" method="POST">
+            <input type="text" id="locationNameInput" value="{{location_name}}" name="name" placeholder="Enter a custom name" required />
+            <button type="submit" id="saveButton">Save Location</button>
+        </form>
+
+        <h3 style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">Find Routes</h3>
+
+        <form id="routeForm" action="/get-route" method="POST" style="display: flex; flex-direction: column; max-width: 400px; gap: 12px; padding: 16px; background: #f8f9fa; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
+            <select id="locationRouteInput1" name="route1" required style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px;">
+                <option value="">Select Location 1</option>
+                {% for location in all_locations %}
+                    <option value="{{ location.id }}">{{ location.name }}</option>
+                {% endfor %}
+            </select>
+
+            <select id="locationRouteInput2" name="route2" required style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px;">
+                <option value="">Select Location 2</option>
+                {% for location in all_locations %}
+                    <option value="{{ location.id }}">{{ location.name }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" id="findRouteButton" style="padding: 10px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s ease;">
+                Find Route
+            </button>
+        </form>
+
+        <div style="margin-left: 10px;">
+            <h3>Saved Locations</h3>
+            <div id="savedLocations">
+                {% if locations %}
+                    {% for location in locations %}
+                        <p>{{ location.marker_name }}</p>
+                    {% endfor %}
+                {% else %}
+                    <p>No locations saved yet.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+    </div>
+    <div id="map"></div>
+</body>
+
+<script>
+    let map, selectedMarker = null, selectedLocation = null;
+    
+    function initMap() {
+        const uwiLocation = { lat: 10.6417, lng: -61.3995 };
+        const directionsService = new google.maps.DirectionsService();
+        const directionsRenderer = new google.maps.DirectionsRenderer();
+        map = new google.maps.Map(document.getElementById("map"), {
+            center: uwiLocation,
+            zoom: 15,
+            mapTypeId: "roadmap",
+            restriction: {
+                latLngBounds: {
+                    north: 10.6455, south: 10.6340, west: -61.4070, east: -61.3920
+                },
+                strictBounds: true
+            }
+        });
+        directionsRenderer.setMap(map);
+
+        const routeDiv = document.getElementById('route-data');
+        const route = JSON.parse(routeDiv.getAttribute('data-route'));
+
+        console.log("Route data:", route);
+
+        if (route && route.routes && route.routes[0] && route.routes[0].legs && route.routes[0].legs[0]) {
+            
+            const startAddress = route.routes[0].legs[0].start_address;
+            const endAddress = route.routes[0].legs[0].end_address;
+
+            const request = {
+                origin: startAddress,
+                destination: endAddress,
+                travelMode: google.maps.TravelMode.WALKING
+            };
+            console.log(request)
+
+            directionsService.route(request, function(result, status) {
+                if (status === 'OK') {
+                    directionsRenderer.setDirections(result);
                 }
-            });
-
-            google.maps.event.addListenerOnce(map, 'idle', function() {
-                loadSavedLocations();
+                else
+                    console.log("error")
             });
         }
 
-        function loadSavedLocations() {
-            fetch('/get_locations')
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Locations received:", data);
-                    if (data.locations.length > 0) {
-                        data.locations.forEach(location => addMarker(location));
-                    }
-                })
-                .catch(error => console.error('Error loading locations:', error));
-        }
+        google.maps.event.addListenerOnce(map, 'idle', function() {
+            loadSavedLocations();
+        });
+    }
 
-        function addMarker(location) {
-            console.log("Adding marker for:", location);
-            const marker = new google.maps.Marker({
-                position: { lat: location.latitude, lng: location.longitude },
-                map: map,
-                title: location.name
-            });
-
-            marker.addListener('click', function() {
-                selectedMarker = marker;
-                selectedLocation = location;
-                document.getElementById("locationNameInput").value = location.name || "";
-
-                if (location.id) {
-                    window.location.href = `/app/${location.id}`;
+    function loadSavedLocations() {
+        fetch('/get_locations')
+            .then(response => response.json())
+            .then(data => {
+                console.log("Locations received:", data);
+                if (data.locations.length > 0) {
+                    data.locations.forEach(location => addMarker(location));
                 }
-            });
-        }
+            })
+            .catch(error => console.error('Error loading locations:', error));
+    }
 
-        function saveLocation(event) {
+    function addMarker(location) {
+        console.log("Adding marker for:", location);
+        const marker = new google.maps.Marker({
+            position: { lat: location.latitude, lng: location.longitude },
+            map: map,
+            title: location.name
+        });
+
+        marker.addListener('click', function() {
+            selectedMarker = marker;
+            selectedLocation = location;
+            document.getElementById("locationNameInput").value = location.name || "";
+
+            if (location.id) {
+                window.location.href = `/app/${location.id}`;
+            }
+        });
+    }
+
+    function saveLocation(event) {
     event.preventDefault(); 
 
     if (!selectedLocation) {
@@ -126,7 +223,7 @@
         }
     })
     .catch(error => console.error('Error:', error));
-}
+    }
         window.onload = function() {
             const flashMessages = document.getElementById('flashed-messages');
             if (flashMessages) {
@@ -135,48 +232,6 @@
             }, 5000); 
             }
         }
-    </script>
-</head>
-<body>
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
-            <div id="flashed-messages">
-                {% for message in messages %}
-                <div class="alert">
-                    {{ message }}
-                </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-        {% endwith %}
-    <div id="sidenav">
-        <div style="margin: 0 10px 20px 10px;">
-            <form action="/logout" method="GET">
-                <button type="submit" style="width: 100%; padding: 8px; font-size: 16px; background-color: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                    Logout
-                </button>
-            </form>
-        </div>
-        <form action="/save_location/{{location_id}}" method="POST">
-            <input type="text" id="locationNameInput" value="{{location_name}}" name="name" placeholder="Enter a custom name" required />
-            <button type="submit" id="saveButton">Save Location</button>
-        </form>
-
-        <div style="margin-left: 10px;">
-            <h3>Saved Locations</h3>
-            <div id="savedLocations">
-                {% if locations %}
-                    {% for location in locations %}
-                        <p>{{ location.marker_name }}</p>
-                    {% endfor %}
-                {% else %}
-                    <p>No locations saved yet.</p>
-                {% endif %}
-            </div>
-        </div>
-        
-    </div>
-    <div id="map"></div>
-</body>
+</script>
 </html>
 
