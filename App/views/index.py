@@ -1,11 +1,13 @@
 from flask import Blueprint, redirect, render_template, request, send_from_directory, jsonify, flash, url_for, session
 from App.controllers import create_user, initialize, get_location, get_user_locations, login_required, get_locations, get_directions
 from flask_jwt_extended import current_user, jwt_required
+from App.models import RegularUser, Admin
 import os
 from dotenv import load_dotenv
-from App.models import RegularUser, Admin
+
 
 load_dotenv()
+SQLALCHEMY_DATABASE_URI = os.getenv("SQLALCHEMY_DATABASE_URI")
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 
 index_views = Blueprint('index_views', __name__, template_folder='../templates')
@@ -36,7 +38,7 @@ def home(location_id=None):
 @index_views.route('/init', methods=['GET'])
 def init():
     initialize()
-    return jsonify(message='db initialized!')
+    return redirect('/')
 
 @index_views.route('/get-route', methods=['POST'])
 def get_route():
