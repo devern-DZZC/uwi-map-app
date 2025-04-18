@@ -103,3 +103,15 @@ def get_directions(origin, destination):
 
     response = requests.get(endpoint, params=params)
     return response.json()
+
+def get_locations_by_description(description):
+    results = Location.query.filter_by(description=description).all()
+    return [
+        {
+            "id": loc.id,
+            "name": loc.name,
+            "latitude": loc.latitude,
+            "longitude": loc.longitude
+        }
+        for loc in results
+    ]

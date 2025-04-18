@@ -108,12 +108,12 @@
         background-color: #A3B18A;
       }
 
-      .filter-buttons {
+      .filter-buttons form {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
-        margin: 10px;
       }
+
       .filter-buttons button {
         background: #A3B18A;
         border: 2px solid black;
@@ -122,11 +122,15 @@
         cursor: pointer;
         transition: all 0.2s ease;
       }
+      .show-all-button {
+        margin-top: 10px; 
+      }
       .filter-buttons button.active,
       .filter-buttons button:hover {
         background: #3A5A40;
         color: #DAD7CD;
       }
+      
 
       .location-container {
         max-width: 400px;
@@ -236,13 +240,19 @@
                     <div class="sub-header">
                       <p> Filter By </p>
                     </div>
-                    <button onclick="filterLocations('faculty')">◆ Faculties</button>
-                    <button onclick="filterLocations('building')">◆ Buildings </button>
-                    <button onclick="filterLocations('field')">◆ Fields </button>
-                    <button onclick="filterLocations('classroom')">◆ Classrooms </button>
-                    <button onclick="filterLocations('auditorium')">◆ Auditoriums </button>
-                    <button onclick="filterLocations('library')">◆ Libraries </button>
-                    <button onclick="filterLocations('car park')">◆ Car Parks </button>
+                    <form action="/app/filter" method="GET">
+                      <button type="submit" name="description" value="faculty">Faculties</button>
+                      <button type="submit" name="description" value="building">Buildings</button>
+                      <button type="submit" name="description" value="field">Fields</button>
+                      <button type="submit" name="description" value="classroom">Classrooms</button>
+                      <button type="submit" name="description" value="auditorium">Auditoriums</button>
+                      <button type="submit" name="description" value="library">Libraries</button>
+                      <button type="submit" name="description" value="car park">Car Parks</button>
+                      <button type="submit" name="description" value="Office">Offices</button>
+                    </form>
+                    <form action="{{ url_for('index_views.home') }}" method="GET" style="margin-left:10px;">
+                      <button type="submit" class="filter-button show-all-button">Show All</button>
+                    </form>
                   </div>
       
                   <div class = "location-container">
@@ -274,7 +284,7 @@
 
 <script>
     let map, selectedMarker = null, selectedLocation = null;
-    
+    const locationsData = {{ all_locations | tojson }};
     function initMap() {
         const uwiLocation = { lat: 10.6417, lng: -61.3995 };
         const directionsService = new google.maps.DirectionsService();
@@ -324,7 +334,10 @@
     }
 
     function loadSavedLocations() {
-        fetch('/get_locations')
+        locationsData.forEach(location => addMarker(location));
+
+    }
+    /*function loadSavedLocations() {
             .then(response => response.json())
             .then(data => {
                 console.log("Locations received:", data);
@@ -332,8 +345,10 @@
                     data.locations.forEach(location => addMarker(location));
                 }
             })
+            })
             .catch(error => console.error('Error loading locations:', error));
-    }
+            locationsData.forEach(location => addMarker(location));
+    }*/
 
     function addMarker(location) {
         console.log("Adding marker for:", location);

@@ -1,5 +1,5 @@
 from flask import Blueprint, redirect, render_template, request, send_from_directory, jsonify, flash, url_for, session
-from App.controllers import create_user, initialize, get_location, get_user_locations, login_required, get_locations, get_directions
+from App.controllers import create_user, initialize, get_location, get_user_locations, login_required, get_locations, get_directions, get_locations_by_description
 from flask_jwt_extended import current_user, jwt_required
 from App.models import RegularUser, Admin
 import os
@@ -58,6 +58,25 @@ def save_location(location_id):
   current_user.add_location(location_id=location_id, name=name)
   flash('Location Saved!')
   return redirect('/app')
+
+
+@index_views.route("/app/filter", methods=["GET"])
+@login_required(RegularUser)
+def filter_locations():
+    description = request.args.get("description")
+    filtered_locations = get_locations_by_description(description)
+    return render_template(
+        "index.html",
+        current_location=get_location(1),
+        current_user=current_user,
+        locations=get_user_locations(current_user.id),
+        location_id=None,
+        location_name="",
+        all_locations=filtered_locations,
+        route=None,
+        api_key=GOOGLE_MAPS_API_KEY
+    )
+
 
 @index_views.route('/health', methods=['GET'])
 def health_check():
