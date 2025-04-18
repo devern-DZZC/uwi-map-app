@@ -15,12 +15,18 @@ class RegularUser(User):
       location = Location.query.filter_by(id=location_id).first()
       if location:
         try:
-          userLocation = UserLocation(user_id=self.id, location_id=location.id, marker_name=name)
-          db.session.add(userLocation)
-          db.session.commit()
-          return userLocation
+          saved_location = UserLocation.query.filter_by(user_id=self.id, location_id=location.id).first()
+          if saved_location is None:
+            userLocation = UserLocation(user_id=self.id, location_id=location.id, marker_name=name)
+            db.session.add(userLocation)
+            db.session.commit()
+          else:
+              return False
+          return True
         except Exception as e:
           print(e)
           db.session.rollback()
           return None
       return None
+  
+ 

@@ -55,8 +55,12 @@ def save_location(location_id):
   if not data:
     return redirect(request.referrer)
   name = data['name']
-  current_user.add_location(location_id=location_id, name=name)
-  flash('Location Saved!')
+  result = current_user.add_location(location_id=location_id, name=name)
+  if result is True: 
+    flash('Location Saved!')
+  else:
+      if result is False:
+        flash('Location already saved')
   return redirect('/app')
 
 
