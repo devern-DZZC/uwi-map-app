@@ -41,6 +41,7 @@ def init():
     return redirect('/')
 
 @index_views.route('/get-route', methods=['POST'])
+@login_required(RegularUser)
 def get_route():
     origin = request.form['route1']
     destination = request.form['route2']

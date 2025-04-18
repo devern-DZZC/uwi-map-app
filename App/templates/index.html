@@ -310,7 +310,7 @@
         <i class="material-icons" style="cursor: pointer" onclick="closeInfoBox()">close</i>
         <h3 id="infoName"></h3>
         <form action="/save_location/{{location_id}}" method="POST">
-            <input type="text" id="locationNameInput" value="{{location_name}}" name="name" placeholder="Enter a custom name" required />
+            <input type="text" id="locationNameInput" value="{{location_name}}" name="name" placeholder="Enter a custom name" required readonly/>
             <button type="submit" id="saveButton">Save Location</button>
         </form>
     </div>
