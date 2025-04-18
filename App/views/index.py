@@ -21,7 +21,7 @@ def home(location_id=None):
       location = get_location(location_id)
       location_name = location.name
     else:
-       location = get_location(1)
+       location = None
        location_name = ""
     return render_template(
         "index.html",

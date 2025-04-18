@@ -176,10 +176,29 @@
         margin: 10px;
         color: #344E41;
       }
+
+
+      /*Location Pop up*/
+      .location-popup {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        right: 15px;
+        border: 3px solid #f1f1f1;
+        z-index: 9;
+      }
+
+      .location-container {
+        max-width: 300px;
+        padding: 10px;
+        background-color: white;
+      }
+
+
     </style>
 </head>
 <body>
-            {% with messages = get_flashed_messages() %}
+        {% with messages = get_flashed_messages() %}
             {% if messages %}
             <div id="flashed-messages">
                 {% for message in messages %}
@@ -208,11 +227,6 @@
                 <img id="place-photo" src="placeholder.jpg" alt="Place photo" style="width:100%; margin-top:10px;" />
                 <div id="place-name"> Please choose a location </div>
             </div>
-            
-            <form action="/save_location/{{location_id}}" method="POST">
-                <input type="text" id="locationNameInput" value="{{location_name}}" name="name" placeholder="Enter a custom name" required />
-                <button type="submit" id="saveButton">Save Location</button>
-            </form>
 
             <h3 style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">Find Routes</h3>
 
@@ -288,6 +302,34 @@
     </div>
     
     <div id="map"></div>
+
+
+<!--Location Information Pop up-->
+  {% if current_location is not none %}
+    <div id="locationInfoBox" style="display: block; position: absolute; right: 0; top: 100px; width: 300px; background: white; padding: 15px; border: 1px solid #ccc; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 999;">
+        <i class="material-icons" style="cursor: pointer" onclick="closeInfoBox()">close</i>
+        <h3 id="infoName"></h3>
+        <form action="/save_location/{{location_id}}" method="POST">
+            <input type="text" id="locationNameInput" value="{{location_name}}" name="name" placeholder="Enter a custom name" required />
+            <button type="submit" id="saveButton">Save Location</button>
+        </form>
+    </div>
+    <script>
+      window.addEventListener('load', function () {
+          const lat = {{ current_location.latitude }};
+          const lng = {{ current_location.longitude }};
+          const target = { lat: lat, lng: lng + 0.00048 };
+
+          if (typeof map !== 'undefined') {
+              map.panTo(target);
+              map.setZoom(18);
+          } else {
+              console.warn("Map is not defined at the time of pan.");
+          }
+      });
+    </script>
+  {% endif %}
+
    
 </body>
 
@@ -370,14 +412,14 @@
         marker.addListener('click', function() {
             selectedMarker = marker;
             selectedLocation = location;
-            document.getElementById("locationNameInput").value = location.name || "";
 
+            //document.getElementById("locationNameInput").value = location.name || "";
             if (location.id) {
                 window.location.href = `/app/${location.id}`;
             }
         });
     }
-
+    
     function saveLocation(event) {
     event.preventDefault(); 
 
@@ -424,6 +466,10 @@
             }, 5000); 
             }
         }
+
+    function closeInfoBox() {
+        document.getElementById("locationInfoBox").style.display = "none";
+}
 </script>
 </html>
 
