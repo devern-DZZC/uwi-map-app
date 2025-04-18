@@ -17,16 +17,31 @@ class RegularUser(User):
         try:
           saved_location = UserLocation.query.filter_by(user_id=self.id, location_id=location.id).first()
           if saved_location is None:
-            userLocation = UserLocation(user_id=self.id, location_id=location.id, marker_name=name)
-            db.session.add(userLocation)
+            user_location = UserLocation(user_id=self.id, location_id=location.id, marker_name=name)
+            db.session.add(user_location)
             db.session.commit()
+            return True
           else:
               return False
+        except Exception as e:
+          print(e)
+          db.session.rollback()
+          return None
+      return None
+  
+  def delete_location(self, location_id):
+      user_location = UserLocation.query.filter_by(user_id=self.id, location_id=location_id).first()
+      if user_location:
+        try: 
+          db.session.delete(user_location)
+          db.session.commit()
           return True
         except Exception as e:
           print(e)
           db.session.rollback()
           return None
       return None
+         
+
   
  

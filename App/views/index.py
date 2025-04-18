@@ -48,6 +48,7 @@ def get_route():
     route_data = get_directions(origin, destination)
     session['route'] = route_data 
     return  redirect(url_for('index_views.home'))
+
 @index_views.route('/save_location/<int:location_id>', methods=['POST'])
 @login_required(RegularUser)
 def save_location(location_id):
@@ -63,6 +64,15 @@ def save_location(location_id):
         flash('Location already saved')
   return redirect('/app')
 
+@index_views.route('/remove_location/<int:location_id>', methods=['POST'])
+@login_required(RegularUser)
+def remove_location(location_id):
+  result = current_user.delete_location(location_id=location_id)
+  if result is True: 
+    flash('Location Deleted!')
+  else:
+     flash('Failed to delete location')
+  return redirect('/app')
 
 @index_views.route("/app/filter", methods=["GET"])
 @login_required(RegularUser)
@@ -80,6 +90,7 @@ def filter_locations():
         route=None,
         api_key=GOOGLE_MAPS_API_KEY
     )
+
 
 
 @index_views.route('/health', methods=['GET'])

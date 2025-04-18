@@ -262,7 +262,16 @@
                     {% for location in current_user.locations %}
                       <div class="location-item">
                         <span class="circle"></span>
-                        <p>{{ location.marker_name }}</p>
+                        <p>
+                          {{ location.marker_name }} 
+                          <form action="/remove_location/{{location.location_id}}" method="POST" style="display:inline;">
+                            <input type="hidden" name="location_id" value="{{ location.location_id }}">
+                            <input type="hidden" name="marker_name" value="{{ location.marker_name }}">
+                            <button type="submit" style="border: none; background: none; cursor: pointer;">
+                              <i class="material-icons" style="color: black;">delete</i>
+                            </button>
+                          </form>
+                        </p>
                       </div>
                     {% endfor %}
                   </div>
