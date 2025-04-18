@@ -11,6 +11,16 @@
     <title>UWI St. Augustine Map</title>
     <script src="https://maps.googleapis.com/maps/api/js?key={{api_key}}&callback=initMap&libraries=places&loading=async" async defer></script>
     <style>
+        @font-face {
+          font-family: 'Corbert Black';
+          src: url('/static/fonts/Corbert_Black.otf') format('opentype');
+        }
+
+        @font-face {
+          font-family: 'Almarose';
+          src: url('/static/fonts/Almarose_Medium.otf') format('opentype');
+        }
+
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
         #sidenav { height: 100%; width: 300px; position: fixed; top: 0; left: 0; background-color: #fafee9; padding-top: 20px; color: black; overflow-y: auto; }
         #map { margin-left: 300px; width: calc(100% - 300px); height: 100vh; }
@@ -38,11 +48,12 @@
             margin: 0;
         }
 
-        .varela-round-regular {
+      .varela-round-regular {
         font-family: "Varela Round", sans-serif;
         font-weight: 400;
         font-style: normal;
       }
+
       body {
         display: flex;
         min-height: 100vh;
@@ -179,21 +190,71 @@
 
 
       /*Location Pop up*/
-      .location-popup {
-        display: none;
-        position: fixed;
-        bottom: 0;
-        right: 15px;
-        border: 3px solid #f1f1f1;
-        z-index: 9;
+      #locationInfoBox {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: absolute; 
+        right: 0; 
+        top: 70px; 
+        width: 300px;
+        height: 75%; 
+        background: white; 
+        padding: 0; 
+        margin-right: 15px;
+        border: 1px solid #ccc; 
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+        z-index: 999;
       }
 
-      .location-container {
-        max-width: 300px;
-        padding: 10px;
-        background-color: white;
+      #locationInfoBox img {
+        width: 100%;
+        height: 25%;
+        object-fit: cover;
+        border-radius: 8px 8px 0 0;
+        
       }
 
+      #infoName {
+        font-family: 'Corbert Black';
+        font-size: 3.0vmin; 
+        color: #403e4b;
+      }
+
+      #locationInfo {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        padding: 15px;
+        margin-bottom: 10px;
+      }
+
+      #locationInfo form {
+        margin-top: auto;
+        text-align: right;
+      }
+
+      .btn{
+        background-color: #3196de; 
+        color: white;
+        font-family: 'Corbert Black';
+        transition: 0.3s ease-in-out;
+      }
+
+      .btn:hover{
+        background-color: #f68630;
+        box-shadow: 0 3px 3px rgba(227, 159, 41, 0.6);
+      }
+
+      #locationInfoBox .close-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: white;
+        padding: 5px;
+        z-index: 1000;
+      }
 
     </style>
 </head>
@@ -302,17 +363,25 @@
     </div>
     
     <div id="map"></div>
-
+    
 
 <!--Location Information Pop up-->
   {% if current_location is not none %}
-    <div id="locationInfoBox" style="display: block; position: absolute; right: 0; top: 100px; width: 300px; background: white; padding: 15px; border: 1px solid #ccc; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 999;">
-        <i class="material-icons" style="cursor: pointer" onclick="closeInfoBox()">close</i>
-        <h3 id="infoName"></h3>
-        <form action="/save_location/{{location_id}}" method="POST">
-            <input type="text" id="locationNameInput" value="{{location_name}}" name="name" placeholder="Enter a custom name" required />
-            <button type="submit" id="saveButton">Save Location</button>
-        </form>
+    <div id="locationInfoBox">
+        <img src="https://picsum.photos/600/400">
+        <i class="material-icons close-button" style="cursor: pointer" onclick="closeInfoBox()">close</i>
+        <div id="locationInfo">
+          <h3 id="infoName">{{current_location.name}}</h3>
+          <form action="/save_location/{{location_id}}" method="POST" style="text-align: right;">
+              <input type="text" id="locationNameInput" value="{{location_name}}" name="name" placeholder="Enter a custom name" required style="font-size: 2.5vmin; color: grey" />
+              <button type="submit" id="saveButton" class="btn">
+                <i class="material-icons" style="color: white;">bookmark_border</i>
+              </button>
+              <button type="" id="" class="btn">
+                Let's Go
+              </button>
+          </form>
+      </div>
     </div>
     <script>
       window.addEventListener('load', function () {
