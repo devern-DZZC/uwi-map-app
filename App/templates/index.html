@@ -22,8 +22,7 @@
         }
 
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
-        #sidenav { height: 100%; width: 300px; position: fixed; top: 0; left: 0; background-color: #fafee9; padding-top: 20px; color: black; overflow-y: auto; }
-        #map { margin-left: 300px; width: calc(100% - 300px); height: 100vh; }
+        #map {width: 100vw; height: 100vh; }
         
         #flashed-messages {
             position: fixed;
@@ -69,12 +68,83 @@
       .brand-logo {
         padding-left: 1rem;
       }
-      .sidenav-trigger {
-        margin: 1rem;
-        color: #DAD7CD; 
+    
+
+      .sidenav_toggler {
+        background-color: #3196de; 
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        width: 32px;
+        height: 32px;
+        outline: none;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
-      .sidenav {
-        background-color: #DAD7CD;
+
+        .sidenav_toggler span,
+        .sidenav_toggler span::before,
+        .sidenav_toggler span::after {
+          position: absolute;
+          content: '';
+          width: 18px;
+          height: 2.5px;
+          background: #fafafa;
+          background-color: white;
+          border-radius: 20px;
+          transition: 500ms cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .sidenav_toggler span::before {
+          top: -8px;
+        }
+          
+        .sidenav_toggler span::after {
+          top: 8px;
+        }
+          
+        .sidenav_toggler.active > span {
+          background: transparent;
+        }
+
+        .sidenav_toggler.active > span::before,
+        .sidenav_toggler.active > span::after {
+            background: white;
+            top: 0px;
+        }
+
+        .sidenav_toggler.active > span::before  {
+            transform: rotate(-225deg);
+        }
+
+        .sidenav_toggler.active > span::after  {
+          transform: rotate(225deg);
+        }
+      
+
+      #sidenav { 
+        height: 100vh; 
+        width: 24%; 
+        position: absolute; 
+        left: -30%;
+        z-index: 998;
+        top: 0; 
+        background-color: #fafee9; 
+        padding-top: 20px; 
+        color: black; 
+        overflow-y: auto; 
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        transition: 300ms left cubic-bezier(0.77, 0, 0.175, 1);
+      }
+
+      #sidenav.active {
+        left: 0;
       }
 
       h5 {
@@ -201,7 +271,7 @@
         height: 75%; 
         background: white; 
         padding: 0; 
-        margin-right: 15px;
+        margin-right: 10px;
         border: 1px solid #ccc; 
         border-radius: 10px;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
@@ -272,6 +342,10 @@
         {% endwith %}
 
     <div id="route-data" data-route='{{ route | tojson | safe }}' style="display: none;"></div>
+    
+    <div class="sidenav_toggler">
+      <span></span>
+    </div>
 
     <div id="sidenav">
         <ul id="slide-out">
@@ -418,6 +492,9 @@
                     north: 10.6455, south: 10.6340, west: -61.4070, east: -61.3920
                 },
                 strictBounds: true
+            },
+            mapTypeControlOptions: {
+              position: google.maps.ControlPosition.TOP_RIGHT
             }
         });
         directionsRenderer.setMap(map);
@@ -535,6 +612,14 @@
             }, 5000); 
             }
         }
+
+    const toggler = document.querySelector('.sidenav_toggler');
+    const menu    = document.querySelector('#sidenav');
+
+    toggler.addEventListener('click', () => {
+      toggler.classList.toggle('active');
+      menu.classList.toggle('active');
+    });
 
     function closeInfoBox() {
         document.getElementById("locationInfoBox").style.display = "none";
