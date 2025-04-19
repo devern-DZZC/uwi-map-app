@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Varela+Round&display=swap" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UWI St. Augustine Map</title>
-    <link rel="icon" type="image/png" href="/static/images/wigo_favicon.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/static/images/favicon.png">
     <script src="https://maps.googleapis.com/maps/api/js?key={{api_key}}&callback=initMap&libraries=places&loading=async" async defer></script>
     <style>
         @font-face {
@@ -47,12 +47,6 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             margin: 0;
         }
-
-      .varela-round-regular {
-        font-family: "Varela Round", sans-serif;
-        font-weight: 400;
-        font-style: normal;
-      }
 
       body {
         display: flex;
@@ -134,8 +128,8 @@
         left: -30%;
         z-index: 998;
         top: 0; 
-        background-color: #fafee9; 
-        padding-top: 20px; 
+        background-color: white; 
+        padding: 0px; 
         color: black; 
         overflow-y: auto; 
         display: flex;
@@ -148,6 +142,12 @@
         left: 0;
       }
 
+      #slide-out {
+        height: 100vh;
+        overflow-y: auto;
+        padding-top: 0px;
+      }
+
       h5 {
         margin-right: 50px;
         padding: 25px;
@@ -158,6 +158,17 @@
         color: #DAD7CD; 
         font-weight: 200;
         border-radius: 2px;
+      }
+
+      .sidenavInfo{
+        padding-top: 30px;
+        padding-left: 10px;
+      }
+
+      .welcomemsg {
+        font-family: 'Corbert Black';
+        font-size: 3.0vmin;
+        color: #403e4b;
       }
 
       .prompt p {
@@ -245,13 +256,6 @@
         width: 100%;
         height: 100%;
         color: #3A5A40;
-      }
-
-      .welcomemsg {
-        margin: 10px;
-        color:#344E41;
-        font-size: small;
-        font-weight: 500;
       }
 
       .place-info {
@@ -352,45 +356,44 @@
         <ul id="slide-out">
 
             <div class= "greeting">
-                <h5> WiGo </h5>
-                <div class="welcomemsg">
-                  <p> Hello, {{current_user.username}}</p>
-                  <p> How can I guide you today? </p>
-                </div>
-            </div>
-  
-            <div class= "place-info">
-                <img id="place-photo" src="placeholder.jpg" alt="Place photo" style="width:100%; margin-top:10px;" />
-                <div id="place-name"> Please choose a location </div>
+                <img src="/static/images/logo.png" style="height: 10vh; max-width: 75%; margin: 0 auto; display: block;">
             </div>
 
-            <h3 style="font-size: 24px; font-weight: bold; margin-bottom: 10px;">Find Routes</h3>
+            <div class="sidenavInfo">
+              <div class="welcomemsg">
+                <p style="margin-bottom: 0px;"> Hello, {{current_user.username}}</p>
+                <p style="margin-top: 10px;"> Where are you going today? </p>
+              </div>
+              <select name="route1" id="route1">
+                <option value="">Select Location 1</option>
+                <option value="loc1">Location A</option>
+                <option value="loc2">Location B</option>
+              </select>
+              <form id="routeForm" action="/get-route" method="POST" style="display: flex; flex-direction: column; max-width: 400px; gap: 12px; padding: 16px; background: #f8f9fa; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
+                  <select id="locationRouteInput1" name="route1" required title="Starting location" style="display: block; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px;">
+                      <option value="">Select Location 1</option>
+                      {% for location in all_locations %}
+                          <option value="{{ location.id }}">{{ location.name }}</option>
+                      {% endfor %}
+                  </select>
 
-            <form id="routeForm" action="/get-route" method="POST" style="display: flex; flex-direction: column; max-width: 400px; gap: 12px; padding: 16px; background: #f8f9fa; border-radius: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
-                <select id="locationRouteInput1" name="route1" required style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px;">
-                    <option value="">Select Location 1</option>
-                    {% for location in all_locations %}
-                        <option value="{{ location.id }}">{{ location.name }}</option>
-                    {% endfor %}
-                </select>
+                  <select id="locationRouteInput2" name="route2" required title="Destination location" style=" display: block; padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px;">
+                      <option value="">Select Location 2</option>
+                      {% for location in all_locations %}
+                          <option value="{{ location.id }}">{{ location.name }}</option>
+                      {% endfor %}
+                  </select>
 
-                <select id="locationRouteInput2" name="route2" required style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 16px;">
-                    <option value="">Select Location 2</option>
-                    {% for location in all_locations %}
-                        <option value="{{ location.id }}">{{ location.name }}</option>
-                    {% endfor %}
-                </select>
-
-                <button type="submit" id="findRouteButton" style="padding: 10px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s ease;">
-                    Find Route
-                </button>
-            </form>
-      
-                  <div class="filter-buttons">
-                    <div class="sub-header">
+                  <button type="submit" id="findRouteButton" style="padding: 10px; font-size: 16px; background-color: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s ease;">
+                      Find Route
+                  </button>
+              </form>
+        
+              <div class="filter-buttons">
+                  <div class="sub-header">
                       <p> Filter By </p>
-                    </div>
-                    <form action="/app/filter" method="GET">
+                  </div>
+                  <form action="/app/filter" method="GET">
                       <button type="submit" name="description" value="faculty">Faculties</button>
                       <button type="submit" name="description" value="building">Buildings</button>
                       <button type="submit" name="description" value="field">Fields</button>
@@ -399,42 +402,44 @@
                       <button type="submit" name="description" value="library">Libraries</button>
                       <button type="submit" name="description" value="car park">Car Parks</button>
                       <button type="submit" name="description" value="Office">Offices</button>
-                    </form>
-                    <form action="{{ url_for('index_views.home') }}" method="GET" style="margin-left:10px;">
+                  </form>
+                  <form action="{{ url_for('index_views.home') }}" method="GET" style="margin-left:10px;">
                       <button type="submit" class="filter-button show-all-button">Show All</button>
-                    </form>
-                  </div>
-      
-                  <div class = "location-container">
-                    <div class="sub-header">
-                      <p> My Locations </p>
-                    </div>
-                    {% for location in current_user.locations %}
-                      <div class="location-item">
-                        <span class="circle"></span>
-                        <p>
-                          {{ location.marker_name }} 
-                          <form action="/remove_location/{{location.location_id}}" method="POST" style="display:inline;">
-                            <input type="hidden" name="location_id" value="{{ location.location_id }}">
-                            <input type="hidden" name="marker_name" value="{{ location.marker_name }}">
-                            <button type="submit" style="border: none; background: none; cursor: pointer;">
-                              <i class="material-icons" style="color: black;">delete</i>
-                            </button>
-                          </form>
-                        </p>
-                      </div>
-                    {% endfor %}
-                  </div>
-      
-                  <div style="margin: 0 10px 20px 10px;">
-                    <form action="/logout" method="GET">
-                        <button type="submit" style="width: 100%; padding: 8px; font-size: 16px; background-color: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">
-                            Logout
-                        </button>
-                    </form>
-                </div>
-        </ul>
+                  </form>
+              </div>
         
+              <div class = "location-container">
+                  <div class="sub-header">
+                      <p> My Locations </p>
+                  </div>
+
+                  {% for location in current_user.locations %}
+                  <div class="location-item">
+                      <span class="circle"></span>
+                          <p>
+                            {{ location.marker_name }} 
+                            <form action="/remove_location/{{location.location_id}}" method="POST" style="display:inline;">
+                              <input type="hidden" name="location_id" value="{{ location.location_id }}">
+                              <input type="hidden" name="marker_name" value="{{ location.marker_name }}">
+                              <button type="submit" style="border: none; background: none; cursor: pointer;">
+                                <i class="material-icons" style="color: black;">delete</i>
+                              </button>
+                            </form>
+                          </p>
+                  </div>
+                  {% endfor %}
+              </div>
+        
+              <div style="margin: 0 10px 20px 10px;">
+                  <form action="/logout" method="GET">
+                      <button type="submit" style="width: 100%; padding: 8px; font-size: 16px; background-color: #e74c3c; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                          Logout
+                      </button>
+                  </form>
+              </div>
+
+            </div>
+        </ul> 
     </div>
     
     <div id="map"></div>
