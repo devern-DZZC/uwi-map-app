@@ -1,7 +1,7 @@
 from flask import Blueprint, redirect, render_template, request, send_from_directory, jsonify, flash, url_for, session
 from App.controllers import create_user, initialize, get_location, get_user_locations, login_required, get_locations, get_directions, get_locations_by_description
 from flask_jwt_extended import current_user, jwt_required
-from App.models import RegularUser, Admin
+from App.models import RegularUser, Admin, Location
 import os
 from dotenv import load_dotenv
 
@@ -45,8 +45,20 @@ def init():
 def get_route():
     origin = request.form['route1']
     destination = request.form['route2']
-    
-    route_data = get_directions(origin, destination)
+    if origin == 'current_location':
+        try:
+            lat = float(request.form['current_lat'])
+            lng = float(request.form['current_lng'])
+            origin_coords = f"{lat},{lng}"
+        except (ValueError, TypeError):
+            flash("Couldn't get current location")
+            return redirect(url_for('index_views.home'))
+    else:
+        location1 = Location.query.get(origin)
+        origin_coords = f"{location1.latitude},{location1.longitude}"
+    location2 = Location.query.get(destination)
+    dest_coords = f"{location2.latitude},{location2.longitude}"
+    route_data = get_directions(origin_coords, dest_coords)
     session['route'] = route_data 
     return  redirect(url_for('index_views.home'))
 

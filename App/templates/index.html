@@ -397,7 +397,7 @@
             <div class="sidenavInfo">
               <div class="welcomemsg">
                 <p style="margin-top: 0px; margin-bottom: 0px;"> Hello, {{current_user.username}}</p>
-                <p style="margin-top: 0px;"> Let's Go </p>
+                <p style="margin-top: 0px;"> Let's explore campus </p>
               </div>
               <select name="route1" id="route1">
                 <option value="">Select Location 1</option>
@@ -409,7 +409,7 @@
                   <i class="material-icons">near_me</i>
                   <select id="locationRouteInput1" name="route1" required title="Starting location" style="display: block; padding: 10px; border-radius: 8px; font-family: 'Almarose'; font-size: 16px; color: #6d6d6d;">
                       <option value="">Select Location 1</option>
-                      <option value="">Current Location</option>
+                      <option value="current_location">Current Location</option>
                       {% for location in all_locations %}
                           <option value="{{ location.id }}">{{ location.name }}</option>
                       {% endfor %}
@@ -505,9 +505,7 @@
               <button type="submit" id="saveButton" class="btn">
                 <i class="material-icons" style="color: white;">bookmark_border</i>
               </button>
-              <button type="" id="" class="btn">
-                Let's Go
-              </button>
+              <button type="submit" id="" class="btn">Let's Go</button>
           </form>
       </div>
     </div>
@@ -584,30 +582,44 @@
         });
     }
 
-    function getUserLocation() {
-        if (navigator.geolocation) {
+
+  const form = document.getElementById('routeForm');
+  form.addEventListener('submit', function (e) {
+    const route1 = document.getElementById('locationRouteInput1').value;
+
+    if (route1 === 'current_location') {
+      e.preventDefault();
+
+      if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => {
-            const userLocation = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            };
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
 
-            map.setCenter(userLocation);
-            new google.maps.Marker({
-              position: userLocation,
-              map: map,
-              title: "You are here!",
-            });
+            const latInput = document.createElement('input');
+            latInput.type = 'hidden';
+            latInput.name = 'current_lat';
+            latInput.value = lat;
+
+            const lngInput = document.createElement('input');
+            lngInput.type = 'hidden';
+            lngInput.name = 'current_lng';
+            lngInput.value = lng;
+
+            form.appendChild(latInput);
+            form.appendChild(lngInput);
+
+            form.submit();
           },
           () => {
-            alert("Geolocation failed or was denied.");
+            alert("Unable to retrieve your location. Please allow location access.");
           }
         );
       } else {
-        alert("Geolocation is not supported by this browser.");
+        alert("Geolocation is not supported.");
       }
     }
+  });
 
 
     function loadSavedLocations() {

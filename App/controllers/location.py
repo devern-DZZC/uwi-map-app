@@ -84,8 +84,9 @@ def delete_location_by_id(loc_id):
         db.session.rollback()
         return False, str(e)
     
-def get_directions(origin, destination):
+def get_directions(origin_coords, dest_coords):
     endpoint = f"https://maps.googleapis.com/maps/api/directions/json"
+    """
     location1 = Location.query.get(origin)
     location2 = Location.query.get(destination)
 
@@ -94,7 +95,7 @@ def get_directions(origin, destination):
 
     print(origin_coords)
     print(dest_coords)
-
+    """
     params = {
         'origin': origin_coords,
         'destination': dest_coords,
