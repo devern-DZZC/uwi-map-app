@@ -12,6 +12,9 @@ class RegularUser(User):
  
 
   def add_location(self, location_id, name):
+      existing_locations = UserLocation.query.filter_by(user_id=self.id).count()
+      if existing_locations >= 10:
+        return 'limit_reached'
       location = Location.query.filter_by(id=location_id).first()
       if location:
         try:

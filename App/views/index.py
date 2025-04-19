@@ -72,9 +72,10 @@ def save_location(location_id):
   result = current_user.add_location(location_id=location_id, name=name)
   if result is True: 
     flash('Location Saved!')
+  elif result is False:
+    flash('Location already saved')
   else:
-      if result is False:
-        flash('Location already saved')
+    flash('Limit on Saved Locations Reached')  
   return redirect('/app')
 
 @index_views.route('/remove_location/<int:location_id>', methods=['POST'])
