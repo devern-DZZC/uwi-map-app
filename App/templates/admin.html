@@ -1,18 +1,404 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UWI St. Augustine Map</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link rel="icon" type="image/png" sizes="512x512" href="/static/images/favicon.png">
     <script src="https://maps.googleapis.com/maps/api/js?key={{api_key}}&callback=initMap&libraries=places&loading=async" async defer></script>
     <style>
+
+@font-face {
+          font-family: 'Corbert Black';
+          src: url('/static/fonts/Corbert_Black.otf') format('opentype');
+        }
+
+        @font-face {
+          font-family: 'Almarose';
+          src: url('/static/fonts/Almarose_Medium.otf') format('opentype');
+        }
+
         html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
-        #sidenav { height: 100%; width: 250px; position: fixed; top: 0; left: 0; background-color: #fafee9; padding-top: 20px; color: black; overflow-y: auto; }
+        #map {width: 100vw; height: 100vh; }
+        
+        #flashed-messages {
+            position: fixed;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999; 
+            width: 80%; 
+            max-width: 600px; 
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #flashed-messages .alert {
+            background-color: #f2f2f2;
+            color: black;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 0;
+        }
+
+      body {
+        display: flex;
+        min-height: 100vh;
+        background-color: #3A5A40;
+      }
+      main {
+        flex: 1 0 auto;
+        padding: 2rem;
+        background-color: #A3B18A;
+        margin: 20px;
+        border-radius: 5px;
+      }
+      .brand-logo {
+        padding-left: 1rem;
+      }
+    
+
+      .sidenav_toggler {
+        background-color: #3196de; 
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        z-index: 1001;
+        width: 36px;
+        height: 35px;
+        outline: none;
+        border-radius: 8px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+        .sidenav_toggler span,
+        .sidenav_toggler span::before,
+        .sidenav_toggler span::after {
+          position: absolute;
+          content: '';
+          width: 18px;
+          height: 2.5px;
+          background: #fafafa;
+          background-color: white;
+          border-radius: 20px;
+          transition: 500ms cubic-bezier(0.77, 0, 0.175, 1);
+        }
+
+        .sidenav_toggler span::before {
+          top: -8px;
+        }
+          
+        .sidenav_toggler span::after {
+          top: 8px;
+        }
+          
+        .sidenav_toggler.active > span {
+          background: transparent;
+        }
+
+        .sidenav_toggler.active > span::before,
+        .sidenav_toggler.active > span::after {
+            background: white;
+            top: 0px;
+        }
+
+        .sidenav_toggler.active > span::before  {
+            transform: rotate(-225deg);
+        }
+
+        .sidenav_toggler.active > span::after  {
+          transform: rotate(225deg);
+        }
+      
+
+      #sidenav { 
+        height: 100vh; 
+        width: 24%; 
+        position: absolute;
+        left: -30%;
+        z-index: 998;
+        top: 0; 
+        background-color: #f0f1f3; 
+        padding: 0px; 
+        color: black; 
+        overflow-y: auto; 
+        display: flex;
+        flex-direction: column;
+        justify-content: left;
+        transition: 300ms left cubic-bezier(0.77, 0, 0.175, 1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+      }
+
+      #sidenav.active {
+        left: 0;
+      }
+
+      #slide-out {
+        height: 100vh;
+        overflow-y: auto;
+        padding-top: 0px;
+      }
+
+      h5 {
+        margin-right: 50px;
+        padding: 25px;
+        height: auto;
+        width: auto;
+        align-self: center;
+        background-color: #344E41;
+        color: #DAD7CD; 
+        font-weight: 200;
+        border-radius: 2px;
+      }
+
+      .sidenavInfo{
+        padding:30px 20px 0 20px;
+      }
+
+      .welcomemsg, .sub-header {
+        font-family: 'Corbert Black';
+        font-size: 3.0vmin;
+        color: #403e4b;
+      }
+
+      #routeForm {
+        display: flex; 
+        flex-direction: column; 
+        max-width: 400px; 
+        gap: 12px; 
+      }
+
+      .dropdown-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+
+      .dropdown-row select {
+        flex: 1;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 16px;
+      }
+
+      .prompt p {
+        width: max-content;
+        height: auto;
+        margin: 5px;
+        padding: 5px;
+        font-size: medium;
+        font-style: oblique;
+        color: #3A5A40;
+      }
+
+      .prompt {
+        display: flex;
+        flex-direction: column;
+        justify-content: center; 
+        align-items: center;     
+        height: 75vh;
+        text-align: center;
+      }
+
+      .prompt a{
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        margin-top: 20px;
+        cursor: pointer;
+        color: #DAD7CD; 
+        background-color: #A3B18A;
+      }
+
+      .filter-buttons form {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .filter-buttons button {
+        display: inline-flex; 
+        align-items: center; 
+        justify-content: center; 
+        padding: 5px 10px; gap: 5px;
+        background-color: #fcfdfd;
+        color: #6d6d6d;
+        font-family: 'Almarose';
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: 0.3s ease-in-out;
+        box-shadow: 3px 2px 5px 2px rgba(207, 207, 207, 0.1); 
+      }
+
+      .show-all-button {
+        margin-top: 10px; 
+        width: 100%;
+      }
+      .filter-buttons button.active,
+      .filter-buttons button:hover {
+        background: #3196de;
+        color: white;
+      }
+      
+      .filter-buttons i, .location-item i {
+        display: inline-flex;
+        align-items: center; 
+        justify-content: center; 
+        width: 30px; 
+        height: 30px; 
+        color: #3196de; 
+        background-color:#ecf6ff; 
+        border-radius: 50%;
+      }
+
+      .location-container {
+        max-width: 400px;
+        margin: 10px;
+        text-align: left;
+      }
+
+      .location-item {        
+        display: inline-flex; 
+        align-items: center; 
+        justify-content: center; 
+        padding: 5px 10px; 
+        gap: 5px;
+        margin: 5px 0px;
+        background-color: #fcfdfd;
+        color: #6d6d6d;
+        font-family: 'Almarose';
+        border: none;
+        border-radius: 5px;
+      }
+
+      .circle {
+        height: 14px;
+        width: 14px;
+        border: 3px solid black;
+        border-radius: 50%;
+        margin-right: 16px;
+      }
+
+      .place-info {
+        margin: 10px;
+        color: #344E41;
+      }
+
+
+      /*Location Pop up*/
+      #locationInfoBox {
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: absolute; 
+        right: 0; 
+        top: 70px; 
+        width: 300px;
+        height: 75%; 
+        background: white; 
+        padding: 0; 
+        margin-right: 10px;
+        border: 1px solid #ccc; 
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
+        z-index: 999;
+      }
+
+      #locationInfoBox img {
+        width: 100%;
+        height: 25%;
+        object-fit: cover;
+        border-radius: 8px 8px 0 0;
+        
+      }
+
+      #infoName {
+        font-family: 'Corbert Black';
+        font-size: 3.0vmin; 
+        color: #403e4b;
+      }
+
+      #locationInfo {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        padding: 15px;
+        margin-bottom: 10px;
+      }
+
+      #locationInfo form {
+        margin-top: auto;
+        text-align: right;
+      }
+
+      .btn{
+        background-color: #3196de; 
+        color: white;
+        font-family: 'Corbert Black';
+        transition: 0.3s ease-in-out;
+      }
+
+      button {
+        background-color: #3196de; 
+        color: white;
+        font-family: 'Corbert Black';
+        transition: 0.3s ease-in-out;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        margin: 10px;
+        padding: 10px;
+        margin-left: 0px;
+      }
+
+      .btn:hover{
+        background-color: #f68630;
+        box-shadow: 0 3px 3px rgba(227, 159, 41, 0.6);
+      }
+
+      button:hover {
+        background-color: #f68630;
+        box-shadow: 0 3px 3px rgba(227, 159, 41, 0.6);
+      }
+
+      #locationInfoBox .close-button {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        color: white;
+        padding: 5px;
+        z-index: 1000;
+      }
+
+      #logout{
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+
+      .outbtn{
+        align-self: center; 
+        margin-bottom: 20px; 
+        flex: 1;
+      }
+ 
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; min-height: 100vh; }
+        #sidenav { height: 100%; width: 250px; position: fixed; top: 0; left: 0; padding-top: 20px; overflow-y: auto; }
         #map { margin-left: 250px; width: calc(100% - 250px); height: 100vh; }
         #sidenav form { margin: 10px; }
-        #saveButton { background-color: #4CAF50; color: white; border: none; cursor: pointer; }
-        #saveButton:hover { background-color: #45a049; }
+        #saveButton {  border: none; cursor: pointer; }
         #flashed-messages {
             position: fixed;
             top: 10px;
@@ -246,23 +632,32 @@
             {% endif %}
         {% endwith %}
     <div id="sidenav">
-        <div style="margin: 0 10px 20px 10px;">
-            <form action="/logout" method="GET">
-                <button type="submit" class="red lighten-1 btn">
-                    Logout
-                </button>
-            </form>
+
+        <div class= "greeting">
+            <img src="/static/images/logo.png" style="height: 10vh; max-width: 75%; margin: 0 auto; display: block;">
         </div>
+
+        <div class="welcomemsg">
+            <p style="margin: 10px 10px 25px 10px;"> {{current_user.username}}'s Dashboard</p>
+        </div>
+
         <form onsubmit="saveLocation(event)">
+            <p id="coordsDisplay" style="margin-top: 5px; font-size: 14px; color: gray;">Click on the map to get coordinates</p>
             <input type="text" id="locationNameInput" name="name" placeholder="Enter a custom name" required />
             <input type="text" id="buildingTypeInput" name="building_type" placeholder="Enter building type" required />
             <input type="hidden" id="latitudeInput" name="latitude" />
             <input type="hidden" id="longitudeInput" name="longitude" />
-            <p id="coordsDisplay" style="margin-top: 5px; font-size: 14px; color: gray;">Click on the map to get coordinates</p>
-            <button type="submit" id="saveButton" class="teal btn" style="margin-top: 10px;">Save Location</button>
-            <button type="button" class="teal btn" style="margin-top: 10px;" onclick="updateLocation()">Update Location</button>
-            <button type="button" class="teal btn" style="margin-top: 10px;" onclick="deleteLocation()">Delete Location</button>
+            <button type="submit" id="saveButton"  style="margin-top: 20px;">Save Location</button>
+            <button type="button"  style="margin-top: 10px;" onclick="updateLocation()">Update Location</button>
+            <button type="button"  style="margin-top: 10px;" onclick="deleteLocation()">Delete Location</button>
         </form>
+
+        <div style="margin: 70px 10px 10px 80px;" class="logout">
+            <form action="/logout" method="GET">
+                <button type="submit" id = "outbtn" style="padding: 10px 0 0 0; font-family: 'Almarose'; font-size: 3.0vmin; background: none; color: #bac5c6; border: none; cursor: pointer;">Logout
+                </button>
+            </form>
+        </div>
         
     </div>
     <div id="map"></div>
