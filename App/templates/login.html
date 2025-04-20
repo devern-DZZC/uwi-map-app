@@ -44,6 +44,36 @@
         font-family: 'Almarose';
       }
 
+/*Loading Screen*/
+      #loader {
+        border: 12px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 12px solid #3196de;
+        width: 70px;
+        height: 70px;
+        animation: spin 2s linear infinite;
+      }
+
+      #loaderContainer {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      @keyframes spin {
+        100% {
+              transform: rotate(360deg);
+            }
+      }
+
       .btn{
         background-color: #3196de; 
         color: white;
@@ -190,6 +220,12 @@
   </head>
 
   <body>
+
+    <div id="loaderContainer" class="center" style="text-align: center;">
+      <div id="loader"></div>
+      <p style="margin-top: 10px; font-family: Almarose;"></p>
+    </div>
+
     <div id="slide1" class="slide active">
       <div class="card">
         <div class="card__img" id="img01"></div>
