@@ -430,7 +430,7 @@
             const uwiLocation = { lat: 10.6417, lng: -61.3995 };
             map = new google.maps.Map(document.getElementById("map"), {
                 center: uwiLocation,
-                zoom: 15,
+                zoom: 14,
                 mapTypeId: "roadmap",
                 restriction: {
                     latLngBounds: {
@@ -644,7 +644,15 @@
         <form onsubmit="saveLocation(event)">
             <p id="coordsDisplay" style="margin-top: 5px; font-size: 14px; color: gray;">Click on the map to get coordinates</p>
             <input type="text" id="locationNameInput" name="name" placeholder="Enter a custom name" required />
-            <input type="text" id="buildingTypeInput" name="building_type" placeholder="Enter building type" required />
+            <select id="buildingTypeInput" name="building_type" style="display: block; padding: 10px; border-radius: 8px; font-family: 'Almarose'; font-size: 16px; color: #6d6d6d;">
+              <option value="" >Select building type</option>
+              <option value="building">Building</option>
+              <option value="faculty">Faculty</option>
+              <option value="field">Office</option>
+              <option value="auditorium">Cafeteria</option>
+              <option value="library">Library</option>
+              <option value="car park">Car Park</option>
+            </select>            
             <input type="hidden" id="latitudeInput" name="latitude" />
             <input type="hidden" id="longitudeInput" name="longitude" />
             <button type="submit" id="saveButton"  style="margin-top: 20px;">Save Location</button>
