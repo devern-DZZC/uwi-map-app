@@ -7,13 +7,15 @@ class Location(db.Model):
     longitude = db.Column(db.Float, nullable=False)
     latitude = db.Column(db.Float, nullable=False)
     description = db.Column(db.String(120), nullable=False)
+    image = db.Column(db.String(220))
     __table_args__ = (
         UniqueConstraint('latitude', 'longitude', name='unique_lat_lng'),
     )
     user_locations = db.relationship('UserLocation', back_populates='location', cascade='all, delete-orphan')
 
-    def __init__(self, name, longitude, latitude, description):
+    def __init__(self, name, longitude, latitude, description, image):
         self.name = name
         self.longitude = longitude
         self.latitude = latitude
         self.description=description
+        self.image=image

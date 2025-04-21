@@ -544,7 +544,7 @@
 <!--Location Information Pop up-->
   {% if current_location is not none %}
     <div id="locationInfoBox">
-        <img src="https://picsum.photos/600/400">
+        <img src="{{current_location.image}}">
         <i class="material-icons close-button" style="cursor: pointer" onclick="closeInfoBox()">close</i>
         <div id="locationInfo">
           <h3 id="infoName">{{current_location.name}}</h3>

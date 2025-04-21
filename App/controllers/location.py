@@ -47,12 +47,13 @@ def parse_locations():
             name = row[0]  
             c = row[1]     
             building_type = row[2]
+            image = row[3]
 
             coords = c.split(', ')
             lat, lon = float(coords[0]), float(coords[1])
             
             if lon is not None and lat is not None:
-                location = Location(name=name, latitude=lat, longitude=lon, description=building_type)
+                location = Location(name=name, latitude=lat, longitude=lon, description=building_type, image=image)
                 locations.append(location)
 
         db.session.add_all(locations)
