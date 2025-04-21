@@ -32,8 +32,11 @@ def login_page():
 def signup_action():
   response = None
   try:
-    username = request.form['username']
-    password = request.form['password']
+    username = request.form['username'].strip()
+    password = request.form['password'].strip()
+    if not username or not password:
+      flash('Username and password cannot be empty or just spaces.')
+      return redirect('/')
     user = signup(username, password)
     response = redirect('/app')
     token = create_access_token(identity=str(user.id))
