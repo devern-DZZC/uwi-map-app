@@ -2,9 +2,10 @@ from flask import Blueprint, render_template, jsonify, request, flash, send_from
 from flask_jwt_extended import jwt_required, current_user, unset_jwt_cookies, set_access_cookies, create_access_token
 from sqlalchemy.exc import IntegrityError
 from.index import index_views
+from App.database import db
 
 from App.controllers import (
-    login, signup, get_user_by_username, login_admin, login_regularUser
+    login, signup, get_user_by_username, login_admin, login_regularUser, get_all_users
 )
 
 from App.models import RegularUser, Admin
@@ -38,6 +39,8 @@ def signup_action():
     token = create_access_token(identity=str(user.id))
     set_access_cookies(response, token)
   except IntegrityError:
+    db.session.rollback()
+    db.session.commit()
     flash('Username already exists')
     response = redirect('/')
   flash('Account created')
