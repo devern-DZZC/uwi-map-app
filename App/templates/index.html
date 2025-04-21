@@ -418,10 +418,12 @@
 
     <div id="route-data" data-route='{{ route | tojson | safe }}' style="display: none;"></div>
     
+    {% if current_user %}
     <div class="sidenav_toggler">
       <span></span>
     </div>
 
+    
     <div id="sidenav">
         <ul id="slide-out">
 
@@ -430,101 +432,112 @@
             </div>
 
             <div class="sidenavInfo">
-              <div class="welcomemsg">
-                <p style="margin-top: 0px; margin-bottom: 0px;"> Hello, {{current_user.username}}</p>
-                <p style="margin-top: 0px;"> Let's explore campus </p>
-              </div>
-              <select name="route1" id="route1">
-                <option value="">Select Location 1</option>
-                <option value="loc1">Location A</option>
-                <option value="loc2">Location B</option>
-              </select>
-              <form id="routeForm" action="/get-route" method="POST">
-                <div class="dropdown-row">
-                  <i class="material-icons">near_me</i>
-                  <select id="locationRouteInput1" name="route1" required title="Starting location" style="display: block; padding: 10px; border-radius: 8px; font-family: 'Almarose'; font-size: 16px; color: #6d6d6d;">
-                      <option value="">Select Location 1</option>
-                      <option value="current_location">Current Location</option>
-                      {% for location in all_locations %}
-                          <option value="{{ location.id }}">{{ location.name }}</option>
-                      {% endfor %}
-                  </select>
-                </div> 
+                <div class="welcomemsg">
+                  <p style="margin-top: 0px; margin-bottom: 0px;"> Hello, {{current_user.username}}</p>
+                  <p style="margin-top: 0px;"> Let's explore campus </p>
+                </div>
+                
+                
+                <form id="routeForm" action="/get-route" method="POST">
+                  <div class="dropdown-row">
+                    <i class="material-icons">near_me</i>
+                    <select id="locationRouteInput1" name="route1" required title="Starting location" style="display: block; padding: 10px; border-radius: 8px; font-family: 'Almarose'; font-size: 16px; color: #6d6d6d;">
+                        <option value="">Select Location 1</option>
+                        <option value="current_location">Current Location</option>
+                        {% for location in all_locations %}
+                            <option value="{{ location.id }}">{{ location.name }}</option>
+                        {% endfor %}
+                    </select>
+                  </div> 
 
-                <div class="dropdown-row">
-                  <i class="material-icons">location_on</i>
-                  <select id="locationRouteInput2" name="route2" required title="Destination location" style="display: block; padding: 10px; border-radius: 8px; font-family: 'Almarose'; font-size: 16px; color: #6d6d6d;">
-                      <option value="">Select Location 2</option>
-                      {% for location in all_locations %}
-                          <option value="{{ location.id }}">{{ location.name }}</option>
-                      {% endfor %}
-                  </select>
-                </div> 
+                  <div class="dropdown-row">
+                    <i class="material-icons">location_on</i>
+                    <select id="locationRouteInput2" name="route2" required title="Destination location" style="display: block; padding: 10px; border-radius: 8px; font-family: 'Almarose'; font-size: 16px; color: #6d6d6d;">
+                        <option value="">Select Location 2</option>
+                        {% for location in all_locations %}
+                            <option value="{{ location.id }}">{{ location.name }}</option>
+                        {% endfor %}
+                    </select>
+                  </div> 
 
-                  <button type="submit" id="findRouteButton" style="padding: 10px; font-size: 16px; background-color: #f68630; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s ease;">
-                      Find Route
-                  </button>
-              </form>
-        
-              <div class="filter-buttons">
-                  <div class="sub-header">
-                      <p> Filter markers </p>
-                  </div>
-                  <form action="/app/filter" method="GET">
-                      <button type="submit" name="description" value="faculty"><i class="material-icons">work</i>Faculties</button>
-                      <button type="submit" name="description" value="building"><i class="material-icons">business</i>Buildings</button>
-                      <button type="submit" name="description" value="Office"><i class="material-icons">class</i>Offices</button>
-                      <button type="submit" name="description" value="classroom"><i class="material-icons">school</i>Classrooms</button>
-                      <button type="submit" name="description" value="auditorium"><i class="material-icons">event_seat</i>Auditoriums</button>
-                      <button type="submit" name="description" value="field"><i class="material-icons">nature_people</i>Fields</button>
-                      <button type="submit" name="description" value="library"><i class="material-icons">local_library</i>Libraries</button>
-                      <button type="submit" name="description" value="car park"><i class="material-icons">drive_eta</i>Car Parks</button>
-                  </form>
-                  <form action="{{ url_for('index_views.home') }}" method="GET">
-                      <button type="submit" class="filter-button show-all-button">Show All</button>
-                  </form>
-              </div>
-        
-              <div class = "location-container">
-                  <div class="sub-header">
-                      <p>My Locations</p>
-                  </div>
+                    <button type="submit" id="findRouteButton" style="padding: 10px; font-size: 16px; background-color: #f68630; color: white; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s ease;">
+                        Find Route
+                    </button>
+                </form>
+                
+                <div class="filter-buttons">
+                    <div class="sub-header">
+                        <p> Filter markers </p>
+                    </div>
+                    <form action="/app/filter" method="GET">
+                        <button type="submit" name="description" value="faculty"><i class="material-icons">work</i>Faculties</button>
+                        <button type="submit" name="description" value="building"><i class="material-icons">business</i>Buildings</button>
+                        <button type="submit" name="description" value="Office"><i class="material-icons">class</i>Offices</button>
+                        <button type="submit" name="description" value="classroom"><i class="material-icons">school</i>Classrooms</button>
+                        <button type="submit" name="description" value="auditorium"><i class="material-icons">event_seat</i>Auditoriums</button>
+                        <button type="submit" name="description" value="field"><i class="material-icons">nature_people</i>Fields</button>
+                        <button type="submit" name="description" value="library"><i class="material-icons">local_library</i>Libraries</button>
+                        <button type="submit" name="description" value="car park"><i class="material-icons">drive_eta</i>Car Parks</button>
+                    </form>
+                    <form action="{{ url_for('index_views.home') }}" method="GET">
+                        <button type="submit" class="filter-button show-all-button">Show All</button>
+                    </form>
+                </div>
+                
+                <div class = "location-container">
+                    <div class="sub-header">
+                        <p>My Locations</p>
+                    </div>
 
-                  {% for location in current_user.locations %}
-                  <div class="location-item">
-                          <p>
-                            {{ location.marker_name }} 
+                    {% for location in current_user.locations %}
+                    <div class="location-item">
+                            <p>
+                              {{ location.marker_name }} 
 
-                            <form action="/remove_location/{{location.location_id}}" method="POST" style="display:inline;">
-                              <input type="hidden" name="location_id" value="{{ location.location_id }}">
-                              <input type="hidden" name="marker_name" value="{{ location.marker_name }}">
-                              <button type="submit" style="border: none; background: none; cursor: pointer;">
-                                <i class="material-icons" style="color: #3196de;">delete</i>
-                              </button>
-                            </form>
+                              <form action="/remove_location/{{location.location_id}}" method="POST" style="display:inline;">
+                                <input type="hidden" name="location_id" value="{{ location.location_id }}">
+                                <input type="hidden" name="marker_name" value="{{ location.marker_name }}">
+                                <button type="submit" style="border: none; background: none; cursor: pointer;">
+                                  <i class="material-icons" style="color: #3196de;">delete</i>
+                                </button>
+                              </form>
 
-                            <form action="/app/{{location.location_id}}" method="GET" style="display:inline;">
-                              <input type="hidden" name="location_id" value="{{ location.location_id }}">
-                              <button type="submit" style="border: none; background: none; cursor: pointer;">
-                                <i class="material-icons" style="color: #3196de;">navigation</i>
-                              </button>
-                            </form>
-                          </p>
-                  </div>
-                  {% endfor %}
-              </div>
-        
-              <div style="margin: 0 10px 20px 10px;">
-                  <form action="/logout" method="GET">
-                      <button type="submit" style="padding: 10px 0 0 0; font-family: 'Almarose'; font-size: 3.0vmin; background: none; color: #bac5c6; border: none; cursor: pointer;">Logout
-                      </button>
-                  </form>
-              </div>
-
+                              <form action="/app/{{location.location_id}}" method="GET" style="display:inline;">
+                                <input type="hidden" name="location_id" value="{{ location.location_id }}">
+                                <button type="submit" style="border: none; background: none; cursor: pointer;">
+                                  <i class="material-icons" style="color: #3196de;">navigation</i>
+                                </button>
+                              </form>
+                            </p>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div style="margin: 0 10px 0 10px;">
+                    <form action="/logout" method="GET">
+                        <button type="submit" style="padding: 10px 0 0 0; font-family: 'Almarose'; font-size: 3.0vmin; background: none; color: #bac5c6; border: none; cursor: pointer;">Logout
+                        </button>
+                    </form>
+                </div>
             </div>
         </ul> 
     </div>
-    
+    {% endif %}
+
+    {% if not current_user %}
+    <div style="height: 100vh; width: 24%; position: absolute; z-index: 998; background-color: #f0f1f3; padding: 0px; font-family: 'Almarose'; justify-content: center; text-align: center;">
+      <div class= "greeting" style="padding-top: 20px">
+        <img src="/static/images/logo.png" style="height: 10vh; max-width: 75%; margin: 0 auto; display: block;">
+      </div>
+      <div style="padding-top: 25vh; color: black;">
+        <p style="margin-top: 0px; margin-bottom: 0px;"> Log in to access</p>
+        <p style="margin-top: 0px;">all WiGo features</p>
+      </div>
+      <div class="btn">
+        <a href="/" style="color: white;">Login</a>
+      </div>
+    </div>
+    {% endif %}
     <div id="map"></div>
     
 
@@ -535,13 +548,14 @@
         <i class="material-icons close-button" style="cursor: pointer" onclick="closeInfoBox()">close</i>
         <div id="locationInfo">
           <h3 id="infoName">{{current_location.name}}</h3>
+          {% if current_user %}
           <form action="/save_location/{{location_id}}" method="POST" style="text-align: right;">
               <input type="text" id="locationNameInput" value="{{location_name}}" name="name" placeholder="Enter a custom name" required style="font-size: 2.5vmin; color: grey" />
               <button type="submit" id="saveButton" class="btn">
                 <i class="material-icons" style="color: white;">bookmark_border</i>
               </button>
-              <button type="submit" id="" class="btn">Let's Go</button>
           </form>
+          {% endif %}
       </div>
     </div>
     <script>
@@ -748,11 +762,13 @@
             }, 5000); 
             }
         }
+        console.log('Script running');
 
     const toggler = document.querySelector('.sidenav_toggler');
     const menu    = document.querySelector('#sidenav');
 
     toggler.addEventListener('click', () => {
+      console.log('Toggle clicked!');
       toggler.classList.toggle('active');
       menu.classList.toggle('active');
     });

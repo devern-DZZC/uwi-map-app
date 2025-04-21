@@ -1,6 +1,6 @@
 from flask import Blueprint, redirect, render_template, request, send_from_directory, jsonify, flash, url_for, session
 from App.controllers import create_user, initialize, get_location, get_user_locations, login_required, get_locations, get_directions, get_locations_by_description
-from flask_jwt_extended import current_user, jwt_required
+from flask_jwt_extended import current_user, jwt_required, verify_jwt_in_request, get_jwt_identity
 from App.models import RegularUser, Admin, Location
 import os
 from dotenv import load_dotenv
@@ -14,8 +14,15 @@ index_views = Blueprint('index_views', __name__, template_folder='../templates')
 
 @index_views.route("/app", methods=['GET'])
 @index_views.route("/app/<int:location_id>", methods=['GET'])
-@login_required(RegularUser)
 def home(location_id=None):
+    user = None
+    try: 
+      verify_jwt_in_request(optional=True)
+      identity = get_jwt_identity()
+      if identity:
+          user = RegularUser.query.get(identity)
+    except Exception as e:
+        user = None
     route = session.pop('route', None)
     if location_id:
       location = get_location(location_id)
@@ -23,11 +30,15 @@ def home(location_id=None):
     else:
        location = None
        location_name = ""
+    if user: 
+      locations = get_user_locations(user.id)
+    else:
+      locations = []
     return render_template(
         "index.html",
         current_location=location,
-        current_user=current_user,
-        locations=get_user_locations(current_user.id),
+        current_user=user,
+        locations=locations,
         location_id=location_id,
         location_name = location_name,
         all_locations = get_locations(),
