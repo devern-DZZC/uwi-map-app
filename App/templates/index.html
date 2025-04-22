@@ -472,7 +472,7 @@
                     <form action="/app/filter" method="GET">
                         <button type="submit" name="description" value="faculty"><i class="material-icons">work</i>Faculties</button>
                         <button type="submit" name="description" value="building"><i class="material-icons">business</i>Buildings</button>
-                        <button type="submit" name="description" value="Office"><i class="material-icons">class</i>Offices</button>
+                        <button type="submit" name="description" value="office"><i class="material-icons">class</i>Offices</button>
                         <button type="submit" name="description" value="classroom"><i class="material-icons">school</i>Classrooms</button>
                         <button type="submit" name="description" value="auditorium"><i class="material-icons">event_seat</i>Auditoriums</button>
                         <button type="submit" name="description" value="field"><i class="material-icons">nature_people</i>Fields</button>
@@ -542,7 +542,8 @@
     
 
 <!--Location Information Pop up-->
-  {% if current_location is not none %}
+{% set path = request.path.strip('/').split('/') %}
+{% if current_location and path|length == 2 and path[0] == 'app' and path[1].isdigit() %}
     <div id="locationInfoBox">
         <img src="{{current_location.image}}">
         <i class="material-icons close-button" style="cursor: pointer" onclick="closeInfoBox()">close</i>
