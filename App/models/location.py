@@ -13,7 +13,7 @@ class Location(db.Model):
     )
     user_locations = db.relationship('UserLocation', back_populates='location', cascade='all, delete-orphan')
 
-    def __init__(self, name, longitude, latitude, description, image):
+    def __init__(self, name, longitude, latitude, description, image=None):
         self.name = name
         self.longitude = longitude
         self.latitude = latitude
